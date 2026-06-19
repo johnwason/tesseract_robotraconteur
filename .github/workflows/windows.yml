@@ -26,11 +26,23 @@ jobs:
       uses: johnwason/vcpkg-action@v8
       with:
         pkgs: >-
-          fcl bullet3[multithreading,double-precision,rtti] octomap
-          console-bridge eigen3 yaml-cpp benchmark tinyxml2 assimp orocos-kdl pcl
-          lapack-reference boost-dll boost-filesystem boost-format boost-stacktrace
-          boost-program-options boost-graph urdfdom ccd[double-precision] gtest
-          ompl taskflow jsoncpp flann benchmark cereal opencv
+          boost-dll boost-program-options
+          boost-serialization boost-filesystem
+          boost-algorithm boost-array boost-asio
+          boost-assign boost-atomic boost-bind boost-config boost-container boost-date-time
+          boost-smart-ptr boost-foreach boost-format boost-function boost-interprocess
+          boost-intrusive boost-lexical-cast boost-locale boost-random boost-range boost-regex
+          boost-scope-exit boost-signals2 boost-thread boost-tuple boost-unordered
+          boost-utility boost-uuid boost-stacktrace
+          tinyxml2 console-bridge assimp
+          urdfdom  orocos-kdl pcl
+          gtest benchmark flann jsoncpp
+          yaml-cpp
+          blas lapack
+          fcl ompl taskflow
+          bullet3[multithreading,double-precision,rtti]
+          ccd[double-precision] 
+          cereal opencv protobuf
         triplet: x64-windows-release
         extra-args: --clean-after-build --overlay-ports=${{ github.workspace }}/target_ws/src/.github/workflows/vcpkg_overlays
         token: ${{ github.token }}
