@@ -40,7 +40,7 @@ jobs:
           sudo apt install -y wget libompl-dev libtaskflow-cpp-dev
 
       - name: Build and Tests
-        uses: tesseract-robotics/colcon-action@734b2bad381cfd9c35eb06684e3b5a238e9c3da2
+        uses: johnwason/colcon-action@vcs_recursive
         with:
           ccache-prefix: ${{ matrix.config.distro }}
           vcs-file: dependencies.repos
