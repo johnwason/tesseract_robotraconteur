@@ -38,3 +38,7 @@
     local-name: drekar_launch_process_cpp
     uri: https://github.com/johnwason/drekar-launch-process-cpp.git
     version: master
+- git:
+    local-name: ruckig
+    uri: https://github.com/Levi-Armstrong/ruckig.git
+    version: cpack-v0.9.2
