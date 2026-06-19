@@ -45,4 +45,4 @@
 - git:
     local-name: drekar_launch_process_cpp
     uri: https://github.com/johnwason/drekar-launch-process-cpp.git
-    version: v0.1.0
+    version: master
