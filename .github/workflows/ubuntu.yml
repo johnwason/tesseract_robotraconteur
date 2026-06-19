@@ -15,7 +15,7 @@ on:
 jobs:
   ci:
     name: ${{ matrix.config.runs-on }}
-    runs-on: ubuntu-${{ matrix.config.runs-on }}
+    runs-on: ${{ matrix.config.runs-on }}
     env:
         DEBIAN_FRONTEND: noninteractive
         TZ: Etc/UTC
