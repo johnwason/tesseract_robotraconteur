@@ -68,6 +68,7 @@ jobs:
           --cmake-args -G "Ninja" -DVCPKG_TARGET_TRIPLET=x64-windows-release 
           -DCMAKE_BUILD_TYPE=Release -DBUILD_IPOPT=OFF -DBUILD_SNOPT=OFF 
           -DTESSERACT_BUILD_TRAJOPT_IFOPT=ON -DVCPKG_APPLOCAL_DEPS=OFF
+          -DProtobuf_PROTOC_EXECUTABLE=$GITHUB_WORKSPACE/vcpkg/installed/x64-windows-v143-release/tools/protobuf/protoc.exe
         target-path: target_ws/src
         target-args: >-
            --event-handlers console_cohesion+ --packages-ignore tesseract_examples 
