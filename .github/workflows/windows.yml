@@ -77,3 +77,10 @@ jobs:
            -DVCPKG_APPLOCAL_DEPS=OFF -DTESSERACT_ENABLE_EXAMPLES=OFF 
            -DProtobuf_PROTOC_EXECUTABLE=$GITHUB_WORKSPACE/vcpkg/installed/x64-windows-v143-release/tools/protobuf/protoc.exe
         run-tests-args: --packages-ignore tesseract_examples
+    - name: collect logs
+      if: failure()
+      uses: actions/upload-artifact@v7
+      with:
+        name: ci-win-logs-${{ matrix.config.name }}
+        path: ./**/*.log
+        retention-days: 7
