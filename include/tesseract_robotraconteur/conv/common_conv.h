@@ -40,20 +40,19 @@ namespace tesseract_robotraconteur
 {
 namespace conv
 {
-    rr_common::ManipulatorInfoPtr ManipulatorInfoToRR(const tesseract::common::ManipulatorInfo& manip_info);
+rr_common::ManipulatorInfoPtr ManipulatorInfoToRR(const tesseract::common::ManipulatorInfo& manip_info);
 
-    tesseract::common::ManipulatorInfo ManipulatorInfoFromRR(const rr_common::ManipulatorInfoPtr& manip_info);
+tesseract::common::ManipulatorInfo ManipulatorInfoFromRR(const rr_common::ManipulatorInfoPtr& manip_info);
 
-    rr_common::JointStatePtr JointStateToRR(const tesseract::common::JointState& joint_state);
+rr_common::JointStatePtr JointStateToRR(const tesseract::common::JointState& joint_state);
 
-    tesseract::common::JointState JointStateFromRR(const rr_common::JointStatePtr& joint_state);
+tesseract::common::JointState JointStateFromRR(const rr_common::JointStatePtr& joint_state);
 
-    rr_common::JointTrajectoryPtr JointTrajectoryToRR(const tesseract::common::JointTrajectory& joint_trajectory);
+rr_common::JointTrajectoryPtr JointTrajectoryToRR(const tesseract::common::JointTrajectory& joint_trajectory);
 
-    tesseract::common::JointTrajectory JointTrajectoryFromRR(const rr_common::JointTrajectoryPtr& joint_trajectory);
+tesseract::common::JointTrajectory JointTrajectoryFromRR(const rr_common::JointTrajectoryPtr& joint_trajectory);
 
 } // namespace conv
 } // namespace tesseract_robotraconteur
-
 
 #endif // TESSERACT_ROBOTRACONTEUR_COMMON_CONV_H

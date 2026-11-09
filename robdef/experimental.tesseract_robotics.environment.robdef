@@ -42,7 +42,7 @@ object Environment
     function SceneState getf_state_joints()
     function SceneState getf_state_all()
     function void setf_state(double{string} joints, Transform{string} floating_joints)
-    
+
     function int32 apply_command(varvalue command)
     function int32 apply_commands(Commands command)
     function Commands getf_command_history()

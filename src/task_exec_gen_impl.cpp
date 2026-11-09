@@ -28,89 +28,79 @@
 #include <tesseract/task_composer/task_composer_future.h>
 #include <tesseract/task_composer/task_composer_context.h>
 
-namespace rr_action=com::robotraconteur::action;
+namespace rr_action = com::robotraconteur::action;
 namespace RR = RobotRaconteur;
 
 namespace tesseract_robotraconteur
 {
-    TaskExecGenImpl::TaskExecGenImpl(tesseract::task_composer::TaskComposerServer::Ptr tesseract_server,
-                    const std::string& executor_name,
-                    const tesseract::task_composer::TaskComposerNode& node,
-                    tesseract::task_composer::TaskComposerDataStorage::Ptr data_storage)
-        : AsyncTaskGenerator(RR::RobotRaconteurNode::sp(), 5000, -1),
-          tesseract_server(tesseract_server),
-          executor_name(executor_name),
-          node(node),
-          data_storage(data_storage)
-    {
-    }
+TaskExecGenImpl::TaskExecGenImpl(tesseract::task_composer::TaskComposerServer::Ptr tesseract_server,
+                                 const std::string& executor_name,
+                                 const tesseract::task_composer::TaskComposerNode& node,
+                                 tesseract::task_composer::TaskComposerDataStorage::Ptr data_storage)
+    : AsyncTaskGenerator(RR::RobotRaconteurNode::sp(), 5000, -1), tesseract_server(tesseract_server),
+      executor_name(executor_name), node(node), data_storage(data_storage)
+{}
 
-    void TaskExecGenImpl::Init()
-    {
-        
-    }
+void TaskExecGenImpl::Init() {}
 
-    void TaskExecGenImpl::StartTask()
-    {
-        auto fut1 = tesseract_server->run(node, data_storage, false, executor_name);
-        std::shared_ptr<tesseract::task_composer::TaskComposerFuture> fut = std::move(fut1);
-        weak_fut = fut;
-        auto shared_this = RR_DYNAMIC_POINTER_CAST<TaskExecGenImpl>(shared_from_this());
-        boost::thread([shared_this, fut]() {
-            try
-            {
-                fut->wait();
-                rr_tasks::TaskExecutorStatusPtr status(new rr_tasks::TaskExecutorStatus());
-                if (fut->context->isAborted())
-                {
-                    throw RR::OperationAbortedException("Task aborted");
-                }
-                else if (fut->context->isSuccessful())
-                {
-                    status->action_status = rr_action::ActionStatusCode::complete;
-                }
-                else
-                {
-                    status->action_status = rr_action::ActionStatusCode::failed;
-                }
-                status->data_storage = conv::TaskComposerDataStorageToRR(fut->context->data_storage);
-                shared_this->SetResult(status);
-                return;
-            }
-            catch (std::exception& e)
-            {
-                auto rr_exp = RR::RobotRaconteurExceptionUtil::ExceptionToSharedPtr(e);
-                shared_this->SetResultException(rr_exp);
-                return;
-            }
-        });
-
-    }
-
-    void TaskExecGenImpl::CloseRequested()
-    {
-        tesseract::task_composer::TaskComposerFuture::Ptr fut = weak_fut.lock();
-        if (!fut)
+void TaskExecGenImpl::StartTask()
+{
+    auto fut1 = tesseract_server->run(node, data_storage, false, executor_name);
+    std::shared_ptr<tesseract::task_composer::TaskComposerFuture> fut = std::move(fut1);
+    weak_fut = fut;
+    auto shared_this = RR_DYNAMIC_POINTER_CAST<TaskExecGenImpl>(shared_from_this());
+    boost::thread([shared_this, fut]() {
+        try
         {
+            fut->wait();
+            rr_tasks::TaskExecutorStatusPtr status(new rr_tasks::TaskExecutorStatus());
+            if (fut->context->isAborted())
+            {
+                throw RR::OperationAbortedException("Task aborted");
+            }
+            else if (fut->context->isSuccessful())
+            {
+                status->action_status = rr_action::ActionStatusCode::complete;
+            }
+            else
+            {
+                status->action_status = rr_action::ActionStatusCode::failed;
+            }
+            status->data_storage = conv::TaskComposerDataStorageToRR(fut->context->data_storage);
+            shared_this->SetResult(status);
             return;
         }
-       
-        // TODO: check if task is running
-        fut->context->abort();
-        
-    }
-
-    void TaskExecGenImpl::AbortRequested()
-    {
-        tesseract::task_composer::TaskComposerFuture::Ptr fut = weak_fut.lock();
-        if (!fut)
+        catch (std::exception& e)
         {
+            auto rr_exp = RR::RobotRaconteurExceptionUtil::ExceptionToSharedPtr(e);
+            shared_this->SetResultException(rr_exp);
             return;
         }
-        
-        // TODO: check if task is running
-        fut->context->abort();
-        
+    });
+}
+
+void TaskExecGenImpl::CloseRequested()
+{
+    tesseract::task_composer::TaskComposerFuture::Ptr fut = weak_fut.lock();
+    if (!fut)
+    {
+        return;
     }
+
+    // TODO: check if task is running
+    fut->context->abort();
+}
+
+void TaskExecGenImpl::AbortRequested()
+{
+    tesseract::task_composer::TaskComposerFuture::Ptr fut = weak_fut.lock();
+    if (!fut)
+    {
+        return;
+    }
+
+    // TODO: check if task is running
+    fut->context->abort();
+}
 
 } // namespace tesseract_robotraconteur

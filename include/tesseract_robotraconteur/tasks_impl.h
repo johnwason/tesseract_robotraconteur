@@ -37,28 +37,30 @@ namespace rr_tasks = experimental::tesseract_robotics::tasks;
 
 namespace tesseract_robotraconteur
 {
-    class TesseractRoboticsImpl;
-    class TaskExecutorImpl : public virtual rr_tasks::TaskExecutor_default_impl
-    {
-    public:
-        TaskExecutorImpl(tesseract::task_composer::TaskComposerServer::Ptr tesseract_server, const std::string& executor_name, RR_SHARED_PTR<TesseractRoboticsImpl> parent);
+class TesseractRoboticsImpl;
+class TaskExecutorImpl : public virtual rr_tasks::TaskExecutor_default_impl
+{
+  public:
+    TaskExecutorImpl(tesseract::task_composer::TaskComposerServer::Ptr tesseract_server,
+                     const std::string& executor_name, RR_SHARED_PTR<TesseractRoboticsImpl> parent);
 
-        void Init();
+    void Init();
 
-        int32_t get_worker_count() override;
+    int32_t get_worker_count() override;
 
-        int32_t get_task_count() override;
+    int32_t get_task_count() override;
 
-        RobotRaconteur::GeneratorPtr<rr_tasks::TaskExecutorStatusPtr, void> run(const rr_tasks::TaskExecutorInputPtr& input) override;
+    RobotRaconteur::GeneratorPtr<rr_tasks::TaskExecutorStatusPtr, void> run(
+        const rr_tasks::TaskExecutorInputPtr& input) override;
 
-    protected:
-        tesseract::task_composer::TaskComposerServer::Ptr tesseract_server;
-        std::string executor_name;
-        RR_WEAK_PTR<TesseractRoboticsImpl> parent_;
+  protected:
+    tesseract::task_composer::TaskComposerServer::Ptr tesseract_server;
+    std::string executor_name;
+    RR_WEAK_PTR<TesseractRoboticsImpl> parent_;
 
-        void loadDefaultPlannerProfiles();
-        std::shared_ptr<tesseract::common::ProfileDictionary> profiles_;
-    };
+    void loadDefaultPlannerProfiles();
+    std::shared_ptr<tesseract::common::ProfileDictionary> profiles_;
+};
 } // namespace tesseract_robotraconteur
 
 #endif // TESSERACT_ROBOTRAOUNTEUR_TASKS_IMPL_H

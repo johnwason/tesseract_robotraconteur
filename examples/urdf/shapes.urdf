@@ -1,5 +1,5 @@
 <robot name="multipleshapes" tesseract:make_convex="true">
-  
+
   <link name="world"/>
   <link name="cylinder_link">
     <visual>

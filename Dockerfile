@@ -16,20 +16,20 @@ RUN apt update \
     && python3 -m pip install vcstool -q \
     && python3 -m pip install colcon-common-extensions -q
 
-SHELL ["/bin/bash", "-c"] 
+SHELL ["/bin/bash", "-c"]
 
 RUN add-apt-repository universe -y
 
 # install packages
 RUN apt-get update && apt-get install -q -y --no-install-recommends \
     dirmngr \
-    gnupg2 
+    gnupg2
 
 RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
 
 RUN echo "deb http://packages.ros.org/ros/ubuntu focal main" > /etc/apt/sources.list.d/ros1-latest.list
 
-RUN apt-get update 
+RUN apt-get update
 
 RUN python3 -m pip install rosdep -q \
     && rosdep init \
@@ -58,4 +58,3 @@ ENV TESSERACT_RESOURCE_PATH=/ws/install/share
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD exec tesseract_robotraconteur_service --urdf-file=$URDF_FILE --srdf-file=$SRDF_FILE --task-plugin-config-file=$TASK_PLUGIN_CONFIG_FILE
-

@@ -2,8 +2,8 @@
 
 # Tesseract Robot Raconteur Service
 
-The `tesseract_robotraconteur_service` provides a Tesseract planner in the form of a 
-[Robot Raconteur](https://github.com/robotraconteur/robotraconteur) service. The service is a wrapper around the 
+The `tesseract_robotraconteur_service` provides a Tesseract planner in the form of a
+[Robot Raconteur](https://github.com/robotraconteur/robotraconteur) service. The service is a wrapper around the
 [Tesseract](https://github.com/tesseract-planning/tesseract) motion planning library. The service
 provides a simple interface to the Tesseract motion planning library.
 
@@ -52,7 +52,7 @@ still be able to find the Robot Raconteur transport and discovery services. With
 
 The following environment variables are available:
 
-* `TESSERACT_RESOURCE_PATH`: This is the path for the resource loader to search for packages. 
+* `TESSERACT_RESOURCE_PATH`: This is the path for the resource loader to search for packages.
   Paths are separated with `:` (Unix) or `;` (Windows). The resource files will need to be
   mounted into the container. In this example, the resource directory `/ws/install/share` is
  mounted to `/res` in the container, and the environment variable is set to `/res`.
@@ -64,8 +64,8 @@ The following environment variables are available:
 ### Building and Running the Service locally
 
 Building Tesseract can be difficult. See
-the [tesseract_planning](https://github.com/tesseract-robotics/tesseract_planning) repository for more 
-information on building Tesseract. Use the `dependencies.repos` file in this repository to get the 
+the [tesseract_planning](https://github.com/tesseract-robotics/tesseract_planning) repository for more
+information on building Tesseract. Use the `dependencies.repos` file in this repository to get the
 additional dependencies required to build the service.
 
 Once built, use the following command to run the service:
@@ -82,12 +82,12 @@ The following options are available:
 * `--urdf-file`: The path to the URDF file to load
 * `--srdf-file`: The path to the SRDF file to load
 * `--task-plugin-config-file`: The path to the task plugin config file to load
-* `export TESSERACT_RESOURCE_PATH`: This is the path for the resource loader to search for packages. 
+* `export TESSERACT_RESOURCE_PATH`: This is the path for the resource loader to search for packages.
   Paths are separated with `:` (Unix) or `;` (Windows). This is required for the service to find things
   like meshes and configuration files.
 
-The standard Robot Raconteur options are also available. See 
-[Robot Raconteur Node Command Line Options](https://github.com/robotraconteur/robotraconteur/wiki/Command-Line-Options) 
+The standard Robot Raconteur options are also available. See
+[Robot Raconteur Node Command Line Options](https://github.com/robotraconteur/robotraconteur/wiki/Command-Line-Options)
 for more information.
 
 ## Using the Service
@@ -111,7 +111,7 @@ from RobotRaconteurCompanion.Util.UuidUtil import UuidUtil
 import numpy as np
 
 def main():
-    
+
     # Connect to the service. In this case, a localhost url is used. If the service were running
     # on a remote node, the URL would be "rr+tcp://hostname.example.com:port" for TCP. An IP
     # address can also be used directly.
@@ -215,7 +215,7 @@ def main():
         if not res:
             break
         status = status1
-    
+
     # Check the status of the pipeline take make sure it completed successfully
     assert status.action_status == action_const["ActionStatusCode"]["complete"]
 
@@ -233,7 +233,7 @@ def main():
     print(wp_positions)
 
     # TODO: plot result in viewer!
-        
+
 if __name__ == '__main__':
     main()
 ```
@@ -246,7 +246,6 @@ Apache 2.0
 
 This work was supported in part by the Advanced Robotics for Manufacturing ("ARM") Institute under Agreement Number W911NF-17-3-0004 sponsored by the Office of the Secretary of Defense. The views and conclusions contained in this document are those of the authors and should not be interpreted as representing the official policies, either expressed or implied, of either ARM or the Office of the Secretary of Defense of the U.S. Government. The U.S. Government is authorized to reproduce and distribute reprints for Government purposes, notwithstanding any copyright notation herein.
 
-This work was supported in part by the New York State Empire State Development Division of Science, Technology and Innovation (NYSTAR) under contract C160142. 
+This work was supported in part by the New York State Empire State Development Division of Science, Technology and Innovation (NYSTAR) under contract C160142.
 
 ![](docs/figures/arm_logo.jpg) ![](docs/figures/nys_logo.jpg)
-

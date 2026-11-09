@@ -28,4 +28,3 @@ object TesseractRobotics
     function string load_environment(string environment_resource_name, string new_environment_name)
     function string clone_environment(string environment_name, string new_environment_name)
 end
-

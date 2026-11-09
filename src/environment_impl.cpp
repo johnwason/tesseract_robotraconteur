@@ -31,181 +31,182 @@
 
 // NOTE: tesseract::environment::Environment is thread safe. Locks are not needed here.
 
-namespace RR=RobotRaconteur;
+namespace RR = RobotRaconteur;
 namespace rr_env_cmds = experimental::tesseract_robotics::environment::commands;
 
 namespace tesseract_robotraconteur
 {
 
-    static void EnvironmentImpl_send_applied_commands(const RR::PipeBroadcasterPtr<rr_env_cmds::CommandsPtr>& broadcaster, const tesseract::environment::Event& event)
-    {   
-        if (!broadcaster)
+static void EnvironmentImpl_send_applied_commands(const RR::PipeBroadcasterPtr<rr_env_cmds::CommandsPtr>& broadcaster,
+                                                  const tesseract::environment::Event& event)
+{
+    if (!broadcaster)
+    {
+        return;
+    }
+
+    if (event.type != tesseract::environment::Events::COMMAND_APPLIED)
+    {
+        return;
+    }
+
+    try
+    {
+        auto command_applied_event = static_cast<const tesseract::environment::CommandAppliedEvent*>(&event);
+
+        auto rr_commands = environment_conv::CommandsToRR(command_applied_event->commands);
+
+        broadcaster->AsyncSendPacket(rr_commands, []() {});
+    }
+    catch (const std::exception& err2)
+    {
+        ROBOTRACONTEUR_LOG_WARNING_COMPONENTNAME(RR::RobotRaconteurNode::weak_sp(), UserService, "tesseract",
+                                                 "environment", -1, "Error sending applied commands: " << err2.what());
+    }
+}
+
+EnvironmentImpl::EnvironmentImpl(tesseract::environment::Environment::Ptr env,
+                                 RR_SHARED_PTR<TesseractRoboticsImpl> parent)
+    : env_(env), parent_(parent)
+{}
+
+void EnvironmentImpl::Init()
+{
+    std::weak_ptr<EnvironmentImpl> weak_this = shared_from_this();
+    env_->addEventCallback(123, [weak_this](const tesseract::environment::Event& event) {
+        auto shared_this = weak_this.lock();
+        if (!shared_this)
         {
             return;
         }
 
-        if (event.type != tesseract::environment::Events::COMMAND_APPLIED)
-        {
-            return;
-        }
+        // TODO: potential thread corruption here
+        auto applied_broadcaster = shared_this->rrvar_applied_commands;
+        EnvironmentImpl_send_applied_commands(applied_broadcaster, event);
+    });
+}
 
-        try
-            {
-            auto command_applied_event = static_cast<const tesseract::environment::CommandAppliedEvent*>(&event);
-                        
-            auto rr_commands = environment_conv::CommandsToRR(command_applied_event->commands);
+std::string EnvironmentImpl::get_name() { return env_->getName(); }
 
-            broadcaster->AsyncSendPacket(rr_commands, []() {});
-            }
-            catch (const std::exception& err2)
-            {
-                ROBOTRACONTEUR_LOG_WARNING_COMPONENTNAME(RR::RobotRaconteurNode::weak_sp(), UserService,"tesseract", "environment", -1, "Error sending applied commands: " << err2.what());
-            }
+RobotRaconteur::RRListPtr<RobotRaconteur::RRArray<char>> EnvironmentImpl::get_joint_names()
+{
+    auto joint_names = env_->getJointNames();
+    return RR::stringVectorToRRList(joint_names);
+}
 
-    }
-    
-    EnvironmentImpl::EnvironmentImpl(tesseract::environment::Environment::Ptr env, RR_SHARED_PTR<TesseractRoboticsImpl> parent)
-        : env_(env), parent_(parent)
-    {}
+RobotRaconteur::RRListPtr<RobotRaconteur::RRArray<char>> EnvironmentImpl::get_link_names()
+{
+    auto link_names = env_->getLinkNames();
+    return RR::stringVectorToRRList(link_names);
+}
 
-    void EnvironmentImpl::Init()
+rr_sg::JointPtr EnvironmentImpl::getf_joint(const std::string& joint_name)
+{
+    return environment_conv::JointToRR(env_->getJoint(joint_name));
+}
+
+rr_sg::LinkPtr EnvironmentImpl::getf_link(const std::string& link_name)
+{
+    return environment_conv::LinkToRR(env_->getLink(link_name));
+}
+
+int32_t EnvironmentImpl::apply_command(const RobotRaconteur::RRValuePtr& command)
+{
+    auto cmd = environment_conv::CommandFromRR(command);
+    return env_->applyCommand(cmd);
+}
+
+int32_t EnvironmentImpl::apply_commands(const rr_env::commands::CommandsPtr& commands)
+{
+    auto cmd = environment_conv::CommandsFromRR(commands);
+    return env_->applyCommands(cmd);
+}
+
+rr_env::commands::CommandsPtr EnvironmentImpl::getf_command_history()
+{
+    auto commands = env_->getCommandHistory();
+    return environment_conv::CommandsToRR(commands);
+}
+
+tesseract::environment::Environment::Ptr EnvironmentImpl::Environment() const { return env_; }
+
+RR::RRArrayPtr<double> EnvironmentImpl::getf_current_joint_values(const RR::RRListPtr<RR::RRArray<char>>& joint_names)
+{
+    RR_NULL_CHECK(joint_names);
+    auto j_vec = RR::RRListToStringVector(joint_names);
+    auto j_pos = env_->getCurrentJointValues(j_vec);
+    return RobotRaconteur::Companion::Converters::Eigen::EigenToRRArray(j_pos);
+}
+
+RR::RRMapPtr<std::string, RR::RRNamedArray<com::robotraconteur::geometry::Transform>> EnvironmentImpl::
+    getf_current_floating_joint_values(const RR::RRListPtr<RR::RRArray<char>>& joint_names)
+{
+    RR_NULL_CHECK(joint_names);
+    auto j_vec = RR::RRListToStringVector(joint_names);
+    auto j_pos = env_->getCurrentFloatingJointValues(j_vec);
+    auto ret = RR::AllocateEmptyRRMap<std::string, RR::RRNamedArray<com::robotraconteur::geometry::Transform>>();
+    for (const auto& e : j_pos)
     {
-        std::weak_ptr<EnvironmentImpl> weak_this = shared_from_this();
-        env_->addEventCallback(123, [weak_this](const tesseract::environment::Event& event) {
-            auto shared_this = weak_this.lock();
-            if (!shared_this)
-            {
-                return;
-            }
-
-            // TODO: potential thread corruption here
-            auto applied_broadcaster = shared_this->rrvar_applied_commands;
-            EnvironmentImpl_send_applied_commands(applied_broadcaster, event);
-        });        
+        auto rr_t = RR::AllocateEmptyRRNamedArray<rr_geom::Transform>(1);
+        rr_t->at(0) = RobotRaconteur::Companion::Converters::Eigen::ToTransform(e.second);
+        ret->insert(std::make_pair(e.first, rr_t));
     }
 
-    std::string EnvironmentImpl::get_name()
+    return ret;
+}
+
+rr_sg::SceneStatePtr EnvironmentImpl::getf_state_all()
+{
+    auto s = env_->getState();
+    return environment_conv::SceneStateToRR(s);
+}
+
+static void _fill_joints(const RR::RRMapPtr<std::string, RR::RRArray<double>>& joints,
+                         std::unordered_map<std::string, double>& ret)
+{
+    for (const auto& e : *joints)
     {
-        return env_->getName();
+        ret.insert(std::make_pair(e.first, RR::RRArrayToScalar(e.second)));
     }
+}
 
-    RobotRaconteur::RRListPtr<RobotRaconteur::RRArray<char>> EnvironmentImpl::get_joint_names()
+static void _fill_joints(const RR::RRMapPtr<std::string, RR::RRNamedArray<rr_geom::Transform>>& joints,
+                         tesseract::common::TransformMap& ret)
+{
+    for (const auto& e : *joints)
     {
-        auto joint_names = env_->getJointNames();
-        return RR::stringVectorToRRList(joint_names);
+        ret.insert(std::make_pair(
+            e.first, RobotRaconteur::Companion::Converters::Eigen::ToIsometry(RR::RRNamedArrayToScalar(e.second))));
     }
+}
 
-    RobotRaconteur::RRListPtr<RobotRaconteur::RRArray<char>> EnvironmentImpl::get_link_names()
+void EnvironmentImpl::setf_state(const RR::RRMapPtr<std::string, RR::RRArray<double>>& joints,
+                                 const RR::RRMapPtr<std::string, RR::RRNamedArray<rr_geom::Transform>>& floating_joints)
+{
+    if (!joints && !floating_joints)
     {
-        auto link_names = env_->getLinkNames();
-        return RR::stringVectorToRRList(link_names);
+        return;
     }
-
-    rr_sg::JointPtr EnvironmentImpl::getf_joint(const std::string& joint_name)
+    else if (joints && floating_joints)
     {
-        return environment_conv::JointToRR(env_->getJoint(joint_name));
+        std::unordered_map<std::string, double> t_joints;
+        tesseract::common::TransformMap t_floating_joints;
+        _fill_joints(joints, t_joints);
+        _fill_joints(floating_joints, t_floating_joints);
+        env_->setState(t_joints, t_floating_joints);
     }
-
-    rr_sg::LinkPtr EnvironmentImpl::getf_link(const std::string& link_name)
+    else if (joints)
     {
-        return environment_conv::LinkToRR(env_->getLink(link_name));
+        std::unordered_map<std::string, double> t_joints;
+        _fill_joints(joints, t_joints);
+        env_->setState(t_joints);
     }
-
-    int32_t EnvironmentImpl::apply_command(const RobotRaconteur::RRValuePtr& command)
+    else
     {
-        auto cmd = environment_conv::CommandFromRR(command);
-        return env_->applyCommand(cmd);
+        tesseract::common::TransformMap t_floating_joints;
+        _fill_joints(floating_joints, t_floating_joints);
+        env_->setState(t_floating_joints);
     }
-
-    int32_t EnvironmentImpl::apply_commands(const rr_env::commands::CommandsPtr& commands)
-    {
-        auto cmd = environment_conv::CommandsFromRR(commands);
-        return env_->applyCommands(cmd);
-    }
-
-    rr_env::commands::CommandsPtr EnvironmentImpl::getf_command_history()
-    {
-        auto commands = env_->getCommandHistory();
-        return environment_conv::CommandsToRR(commands);
-    }
-
-    tesseract::environment::Environment::Ptr EnvironmentImpl::Environment() const { return env_; }
-
-    RR::RRArrayPtr<double > EnvironmentImpl::getf_current_joint_values(const RR::RRListPtr<RR::RRArray<char>>& joint_names)
-    {
-        RR_NULL_CHECK(joint_names);
-        auto j_vec = RR::RRListToStringVector(joint_names);
-        auto j_pos = env_->getCurrentJointValues(j_vec);
-        return RobotRaconteur::Companion::Converters::Eigen::EigenToRRArray(j_pos);
-    }
-
-    RR::RRMapPtr<std::string,RR::RRNamedArray<com::robotraconteur::geometry::Transform>> EnvironmentImpl::getf_current_floating_joint_values(const RR::RRListPtr<RR::RRArray<char>>& joint_names)
-    {
-        RR_NULL_CHECK(joint_names);
-        auto j_vec = RR::RRListToStringVector(joint_names);
-        auto j_pos = env_->getCurrentFloatingJointValues(j_vec);
-        auto ret = RR::AllocateEmptyRRMap<std::string,RR::RRNamedArray<com::robotraconteur::geometry::Transform>>();
-        for (const auto& e : j_pos)
-        {
-            auto rr_t = RR::AllocateEmptyRRNamedArray<rr_geom::Transform>(1);
-            rr_t->at(0) = RobotRaconteur::Companion::Converters::Eigen::ToTransform(e.second);
-            ret->insert(std::make_pair(e.first, rr_t));
-        }
-
-        return ret;
-    }
-
-    rr_sg::SceneStatePtr EnvironmentImpl::getf_state_all()
-    {
-        auto s = env_->getState();
-        return environment_conv::SceneStateToRR(s);
-    }
-
-    static void _fill_joints(const RR::RRMapPtr<std::string,RR::RRArray<double >>& joints, std::unordered_map<std::string, double>& ret)
-    {
-        for (const auto& e : *joints)
-        {
-            ret.insert(std::make_pair(e.first, RR::RRArrayToScalar(e.second)));
-        }
-    }
-
-    static void _fill_joints(const RR::RRMapPtr<std::string,RR::RRNamedArray<rr_geom::Transform>>& joints, tesseract::common::TransformMap& ret)
-    {
-        for (const auto& e : *joints)
-        {
-            ret.insert(std::make_pair(e.first, RobotRaconteur::Companion::Converters::Eigen::ToIsometry(RR::RRNamedArrayToScalar(e.second))));
-        }
-    }
-
-    void EnvironmentImpl::setf_state(const RR::RRMapPtr<std::string,RR::RRArray<double >>& joints, const RR::RRMapPtr<std::string,RR::RRNamedArray<rr_geom::Transform>>& floating_joints)
-    {
-        if (!joints && !floating_joints)
-        {
-            return;
-        }
-        else
-        if (joints && floating_joints)
-        {
-            std::unordered_map<std::string, double> t_joints;
-            tesseract::common::TransformMap t_floating_joints;
-            _fill_joints(joints, t_joints);
-            _fill_joints(floating_joints, t_floating_joints);
-            env_->setState(t_joints, t_floating_joints);
-        }
-        else if (joints)
-        {
-            std::unordered_map<std::string, double> t_joints;
-            _fill_joints(joints, t_joints);
-            env_->setState(t_joints);
-        }
-        else
-        {
-            tesseract::common::TransformMap t_floating_joints;
-            _fill_joints(floating_joints, t_floating_joints);
-            env_->setState(t_floating_joints);
-        }
-    }
-
-
+}
 
 } // namespace tesseract_robotraconteur

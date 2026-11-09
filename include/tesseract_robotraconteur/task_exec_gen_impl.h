@@ -43,10 +43,9 @@ namespace tesseract_robotraconteur
 
 class TaskExecGenImpl : public virtual RobotRaconteur::Companion::Util::AsyncTaskGenerator<rr_tasks::TaskExecutorStatus>
 {
-public:
+  public:
     TaskExecGenImpl(tesseract::task_composer::TaskComposerServer::Ptr tesseract_server,
-                    const std::string& executor_name,
-                    const tesseract::task_composer::TaskComposerNode& node,
+                    const std::string& executor_name, const tesseract::task_composer::TaskComposerNode& node,
                     tesseract::task_composer::TaskComposerDataStorage::Ptr data_storage);
 
     void Init();
@@ -57,7 +56,7 @@ public:
 
     virtual void AbortRequested() override;
 
-protected:
+  protected:
     tesseract::task_composer::TaskComposerServer::Ptr tesseract_server;
     std::string executor_name;
     const tesseract::task_composer::TaskComposerNode& node;

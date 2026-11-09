@@ -3,47 +3,47 @@ name: Ubuntu
 on:
   push:
     branches:
-      - master
-      - 'dev**'
+    - master
+    - 'dev**'
   pull_request:
   schedule:
-    - cron: '0 5 * * *'
+  - cron: '0 5 * * *'
   release:
     types:
-      - released
+    - released
 
 jobs:
   ci:
     name: ${{ matrix.config.runs-on }}
     runs-on: ${{ matrix.config.runs-on }}
     env:
-        DEBIAN_FRONTEND: noninteractive
-        TZ: Etc/UTC
+      DEBIAN_FRONTEND: noninteractive
+      TZ: Etc/UTC
     strategy:
       fail-fast: false
       matrix:
         config:
         - distro: noble
           runs-on: ubuntu-24.04
-      
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-        with:
-          path: target_ws/src
+    - name: Checkout repository
+      uses: actions/checkout@v6
+      with:
+        path: target_ws/src
 
-      - name: Install Depends
-        shell: bash
-        run: |
-          sudo apt update
-          sudo apt upgrade -y
-          sudo apt install -y wget libompl-dev libtaskflow-cpp-dev
+    - name: Install Depends
+      shell: bash
+      run: |
+        sudo apt update
+        sudo apt upgrade -y
+        sudo apt install -y wget libompl-dev libtaskflow-cpp-dev
 
-      - name: Build and Tests
-        uses: johnwason/colcon-action@vcs_recursive
-        with:
-          ccache-prefix: ${{ matrix.config.distro }}
-          vcs-file: dependencies.repos
-          upstream-args: --cmake-args -DCMAKE_BUILD_TYPE=Release
-          target-path: target_ws/src
-          target-args: --cmake-args -DCMAKE_BUILD_TYPE=Debug
+    - name: Build and Tests
+      uses: johnwason/colcon-action@vcs_recursive
+      with:
+        ccache-prefix: ${{ matrix.config.distro }}
+        vcs-file: dependencies.repos
+        upstream-args: --cmake-args -DCMAKE_BUILD_TYPE=Release
+        target-path: target_ws/src
+        target-args: --cmake-args -DCMAKE_BUILD_TYPE=Debug

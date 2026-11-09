@@ -66,111 +66,92 @@ namespace RR = RobotRaconteur;
 
 namespace tesseract_robotraconteur
 {
-    TaskExecutorImpl::TaskExecutorImpl(tesseract::task_composer::TaskComposerServer::Ptr tesseract_server, 
-        const std::string& executor_name,
-        RR_SHARED_PTR<TesseractRoboticsImpl> parent)
-        : tesseract_server(tesseract_server), executor_name(executor_name),  parent_(parent),
-        profiles_(std::make_shared<tesseract::common::ProfileDictionary>())
+TaskExecutorImpl::TaskExecutorImpl(tesseract::task_composer::TaskComposerServer::Ptr tesseract_server,
+                                   const std::string& executor_name, RR_SHARED_PTR<TesseractRoboticsImpl> parent)
+    : tesseract_server(tesseract_server), executor_name(executor_name), parent_(parent),
+      profiles_(std::make_shared<tesseract::common::ProfileDictionary>())
+{
+    loadDefaultPlannerProfiles();
+}
+
+void TaskExecutorImpl::Init()
+{
+    // Nothing to do here for now
+}
+
+int32_t TaskExecutorImpl::get_worker_count() { return tesseract_server->getWorkerCount(executor_name); }
+
+int32_t TaskExecutorImpl::get_task_count() { return tesseract_server->getTaskCount(executor_name); }
+
+RR::GeneratorPtr<rr_tasks::TaskExecutorStatusPtr, void> TaskExecutorImpl::run(
+    const rr_tasks::TaskExecutorInputPtr& input)
+{
+    RR_NULL_CHECK(input);
+    auto task_name = input->task_name;
+    RR_SHARED_PTR<TesseractRoboticsImpl> parent = parent_.lock();
+    if (!parent)
     {
-        loadDefaultPlannerProfiles();
+        throw RR::InvalidOperationException("Parent has been released");
+    }
+    tesseract::task_composer::TaskComposerDataStorage::Ptr data_storage =
+        conv::TaskComposerDataStorageFromRR(input->data_storage, parent);
+    if (!data_storage)
+    {
+        data_storage = std::make_shared<tesseract::task_composer::TaskComposerDataStorage>();
     }
 
-    void TaskExecutorImpl::Init()
-    {
-        // Nothing to do here for now
-    }
+    data_storage->setData("profiles", profiles_);
 
-    int32_t TaskExecutorImpl::get_worker_count()
-    {
-        return tesseract_server->getWorkerCount(executor_name);
-    }
+    auto& node = tesseract_server->getTask(task_name);
 
-    int32_t TaskExecutorImpl::get_task_count()
-    {
-        return tesseract_server->getTaskCount(executor_name);
-    }
+    return RR_MAKE_SHARED<TaskExecGenImpl>(tesseract_server, executor_name, node, data_storage);
+}
 
-    RR::GeneratorPtr<rr_tasks::TaskExecutorStatusPtr, void> TaskExecutorImpl::run(const rr_tasks::TaskExecutorInputPtr& input)
-    {
-        RR_NULL_CHECK(input);
-        auto task_name = input->task_name;
-        RR_SHARED_PTR<TesseractRoboticsImpl> parent = parent_.lock();
-        if (!parent)
-        {
-            throw RR::InvalidOperationException("Parent has been released");
-        }
-        tesseract::task_composer::TaskComposerDataStorage::Ptr data_storage = conv::TaskComposerDataStorageFromRR(input->data_storage, parent);
-        if (!data_storage)
-        {
-            data_storage = std::make_shared<tesseract::task_composer::TaskComposerDataStorage>();
-        }
-
-        data_storage->setData("profiles", profiles_);
-
-        auto& node = tesseract_server->getTask(task_name);
-
-        return RR_MAKE_SHARED<TaskExecGenImpl>(tesseract_server, executor_name, node, data_storage);
-            
-    }
-
-    // copied from tesseract_ros2
-    void TaskExecutorImpl::loadDefaultPlannerProfiles()
-    {
+// copied from tesseract_ros2
+void TaskExecutorImpl::loadDefaultPlannerProfiles()
+{
     // Add TrajOpt Default Profiles
-    profiles_->addProfile(TRAJOPT_DEFAULT_NAMESPACE,
-                            tesseract::command_language::DEFAULT_PROFILE_KEY,
-                            std::make_shared<tesseract::motion_planners::TrajOptDefaultMoveProfile>());
-    profiles_->addProfile(TRAJOPT_DEFAULT_NAMESPACE,
-                            tesseract::command_language::DEFAULT_PROFILE_KEY,
-                            std::make_shared<tesseract::motion_planners::TrajOptDefaultCompositeProfile>());
-    profiles_->addProfile(TRAJOPT_DEFAULT_NAMESPACE,
-                            tesseract::command_language::DEFAULT_PROFILE_KEY,
-                            std::make_shared<tesseract::motion_planners::TrajOptOSQPSolverProfile>());
+    profiles_->addProfile(TRAJOPT_DEFAULT_NAMESPACE, tesseract::command_language::DEFAULT_PROFILE_KEY,
+                          std::make_shared<tesseract::motion_planners::TrajOptDefaultMoveProfile>());
+    profiles_->addProfile(TRAJOPT_DEFAULT_NAMESPACE, tesseract::command_language::DEFAULT_PROFILE_KEY,
+                          std::make_shared<tesseract::motion_planners::TrajOptDefaultCompositeProfile>());
+    profiles_->addProfile(TRAJOPT_DEFAULT_NAMESPACE, tesseract::command_language::DEFAULT_PROFILE_KEY,
+                          std::make_shared<tesseract::motion_planners::TrajOptOSQPSolverProfile>());
 
     // Add TrajOpt IFOPT Default Profiles
-    profiles_->addProfile(TRAJOPT_IFOPT_DEFAULT_NAMESPACE,
-                            tesseract::command_language::DEFAULT_PROFILE_KEY,
-                            std::make_shared<tesseract::motion_planners::TrajOptIfoptDefaultMoveProfile>());
-    profiles_->addProfile(TRAJOPT_IFOPT_DEFAULT_NAMESPACE,
-                            tesseract::command_language::DEFAULT_PROFILE_KEY,
-                            std::make_shared<tesseract::motion_planners::TrajOptIfoptDefaultCompositeProfile>());
-    profiles_->addProfile(TRAJOPT_IFOPT_DEFAULT_NAMESPACE,
-                            tesseract::command_language::DEFAULT_PROFILE_KEY,
-                            std::make_shared<tesseract::motion_planners::TrajOptIfoptOSQPSolverProfile>());
+    profiles_->addProfile(TRAJOPT_IFOPT_DEFAULT_NAMESPACE, tesseract::command_language::DEFAULT_PROFILE_KEY,
+                          std::make_shared<tesseract::motion_planners::TrajOptIfoptDefaultMoveProfile>());
+    profiles_->addProfile(TRAJOPT_IFOPT_DEFAULT_NAMESPACE, tesseract::command_language::DEFAULT_PROFILE_KEY,
+                          std::make_shared<tesseract::motion_planners::TrajOptIfoptDefaultCompositeProfile>());
+    profiles_->addProfile(TRAJOPT_IFOPT_DEFAULT_NAMESPACE, tesseract::command_language::DEFAULT_PROFILE_KEY,
+                          std::make_shared<tesseract::motion_planners::TrajOptIfoptOSQPSolverProfile>());
 
     // Add Descartes Default Profiles
-    profiles_->addProfile(DESCARTES_DEFAULT_NAMESPACE,
-                            tesseract::command_language::DEFAULT_PROFILE_KEY,
-                            std::make_shared<tesseract::motion_planners::DescartesDefaultMoveProfile<double>>());
+    profiles_->addProfile(DESCARTES_DEFAULT_NAMESPACE, tesseract::command_language::DEFAULT_PROFILE_KEY,
+                          std::make_shared<tesseract::motion_planners::DescartesDefaultMoveProfile<double>>());
 
     // Add OMPL Default Profiles
-    profiles_->addProfile(OMPL_DEFAULT_NAMESPACE,
-                            tesseract::command_language::DEFAULT_PROFILE_KEY,
-                            std::make_shared<tesseract::motion_planners::OMPLRealVectorMoveProfile>());
+    profiles_->addProfile(OMPL_DEFAULT_NAMESPACE, tesseract::command_language::DEFAULT_PROFILE_KEY,
+                          std::make_shared<tesseract::motion_planners::OMPLRealVectorMoveProfile>());
 
     // Add Simple Default Profiles
-    profiles_->addProfile(SIMPLE_DEFAULT_NAMESPACE,
-                            tesseract::command_language::DEFAULT_PROFILE_KEY,
-                            std::make_shared<tesseract::motion_planners::SimplePlannerLVSNoIKMoveProfile>());
+    profiles_->addProfile(SIMPLE_DEFAULT_NAMESPACE, tesseract::command_language::DEFAULT_PROFILE_KEY,
+                          std::make_shared<tesseract::motion_planners::SimplePlannerLVSNoIKMoveProfile>());
 
     // MinLengthTask calls the SimpleMotionPlanner to generate a seed path with waypoints interpolated in joint space
-    profiles_->addProfile(MLT_DEFAULT_NAMESPACE,
-                            tesseract::command_language::DEFAULT_PROFILE_KEY,
-                            std::make_shared<tesseract::task_composer::MinLengthProfile>());
+    profiles_->addProfile(MLT_DEFAULT_NAMESPACE, tesseract::command_language::DEFAULT_PROFILE_KEY,
+                          std::make_shared<tesseract::task_composer::MinLengthProfile>());
 
     // Post hoc collision checking
-    profiles_->addProfile(DCC_DEFAULT_NAMESPACE,
-                            tesseract::command_language::DEFAULT_PROFILE_KEY,
-                            std::make_shared<tesseract::task_composer::ContactCheckProfile>());
+    profiles_->addProfile(DCC_DEFAULT_NAMESPACE, tesseract::command_language::DEFAULT_PROFILE_KEY,
+                          std::make_shared<tesseract::task_composer::ContactCheckProfile>());
 
     // Time parameterization
     profiles_->addProfile(
-        ISP_DEFAULT_NAMESPACE,
-        tesseract::command_language::DEFAULT_PROFILE_KEY,
+        ISP_DEFAULT_NAMESPACE, tesseract::command_language::DEFAULT_PROFILE_KEY,
         std::make_shared<tesseract::time_parameterization::IterativeSplineParameterizationCompositeProfile>());
     profiles_->addProfile(
-        ISP_DEFAULT_NAMESPACE,
-        tesseract::command_language::DEFAULT_PROFILE_KEY,
+        ISP_DEFAULT_NAMESPACE, tesseract::command_language::DEFAULT_PROFILE_KEY,
         std::make_shared<tesseract::time_parameterization::IterativeSplineParameterizationMoveProfile>());
-    }
+}
 } // namespace tesseract_robotraconteur

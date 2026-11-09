@@ -30,14 +30,13 @@
 #include <RobotRaconteurCompanion/Converters/EigenConverters.h>
 
 // Convenience namespace aliases
-namespace RR=RobotRaconteur;
+namespace RR = RobotRaconteur;
 
 namespace rr_tasks = experimental::tesseract_robotics::tasks;
-namespace RRC_Eigen=RobotRaconteur::Companion::Converters::Eigen;
+namespace RRC_Eigen = RobotRaconteur::Companion::Converters::Eigen;
 namespace rr_tesseract = experimental::tesseract_robotics;
 namespace rr_common = experimental::tesseract_robotics::common;
 namespace rr_command = experimental::tesseract_robotics::command_language;
-
 
 // TODO: Add this function to the Robot Raconteur companion library
 com::robotraconteur::uuid::UUID new_random_uuid()
@@ -68,7 +67,8 @@ auto build_move_instr(const Eigen::Isometry3d& wp)
 }
 
 // Main entry point
-int main(int argc, char **argv) {
+int main(int argc, char** argv)
+{
 
     // Initialize Robot Raconteur using ClientNodeSetup, the generated thunk source types, and command line arguments
     RR::ClientNodeSetup node_setup(ROBOTRACONTEUR_SERVICE_TYPES, argc, argv);
@@ -79,13 +79,16 @@ int main(int argc, char **argv) {
     //
     // Robot Raconteur has advanced discovery and subscriptions that can be used instead of URLs. See
     // the documentation for more information.
-    rr_tesseract::TesseractRoboticsPtr c = RR::rr_cast<rr_tesseract::TesseractRobotics>(RR::RobotRaconteurNode::s()->ConnectService("rr+tcp://localhost:63158?service=tesseract"));
+    rr_tesseract::TesseractRoboticsPtr c = RR::rr_cast<rr_tesseract::TesseractRobotics>(
+        RR::RobotRaconteurNode::s()->ConnectService("rr+tcp://localhost:63158?service=tesseract"));
 
     // Get the available task pipeline information from the service. Tesseract task pipelines
     // execute planning and other operations
     auto task_info = c->get_tasks_info();
-    std::string output_key = RR::RRArrayToString(RR::rr_cast<RR::RRArray<char>>(task_info->at("FreespacePipeline")->output_keys->at("program")->keys));
-    std::string input_key = RR::RRArrayToString(RR::rr_cast<RR::RRArray<char>>(task_info->at("FreespacePipeline")->input_keys->at("planning_input")->keys));
+    std::string output_key = RR::RRArrayToString(
+        RR::rr_cast<RR::RRArray<char>>(task_info->at("FreespacePipeline")->output_keys->at("program")->keys));
+    std::string input_key = RR::RRArrayToString(
+        RR::rr_cast<RR::RRArray<char>>(task_info->at("FreespacePipeline")->input_keys->at("planning_input")->keys));
 
     // Create the environment. In this case, the environment is loaded from the service. The
     // available environments are specified when the service is started. "default" is the
@@ -97,8 +100,10 @@ int main(int argc, char **argv) {
     env_handle->name = "env";
 
     // Create the instructions
-    auto instr1 = build_move_instr(Eigen::Isometry3d::Identity() * Eigen::Translation3d(0.9, -0.3, 1.455) * Eigen::Quaterniond(0.70710678,0,0.70710678,0));
-    auto instr2 = build_move_instr(Eigen::Isometry3d::Identity() * Eigen::Translation3d(0.9, 0.3, 1.455) * Eigen::Quaterniond(0.70710678,0,0.70710678,0));
+    auto instr1 = build_move_instr(Eigen::Isometry3d::Identity() * Eigen::Translation3d(0.9, -0.3, 1.455) *
+                                   Eigen::Quaterniond(0.70710678, 0, 0.70710678, 0));
+    auto instr2 = build_move_instr(Eigen::Isometry3d::Identity() * Eigen::Translation3d(0.9, 0.3, 1.455) *
+                                   Eigen::Quaterniond(0.70710678, 0, 0.70710678, 0));
 
     // Create and configure the manipulator info structure
     rr_common::ManipulatorInfoPtr manip_info(new rr_common::ManipulatorInfo());
@@ -142,8 +147,7 @@ int main(int argc, char **argv) {
     do
     {
         res = exec_gen->TryNext(status);
-    }
-    while (res);
+    } while (res);
 
     // Check the status of the pipeline take make sure it completed successfully
     if (status->action_status != com::robotraconteur::action::ActionStatusCode::complete)
@@ -167,7 +171,7 @@ int main(int argc, char **argv) {
     // Print out the joint trajectory
     for (auto& j : joint_trajectory)
     {
-        std::cout <<"[" << j.transpose() << "]" << std::endl;
+        std::cout << "[" << j.transpose() << "]" << std::endl;
     }
 
     // TODO: plot result in viewer!
