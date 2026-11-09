@@ -4,7 +4,7 @@
 
 The `tesseract_robotraconteur_service` provides a Tesseract planner in the form of a
 [Robot Raconteur](https://github.com/robotraconteur/robotraconteur) service. The service is a wrapper around the
-[Tesseract](https://github.com/tesseract-planning/tesseract) motion planning library. The service
+[Tesseract](https://github.com/tesseract-robotics/tesseract) motion planning library. The service
 provides a simple interface to the Tesseract motion planning library.
 
 Robot Raconteur is a powerful open-source object-oriented communication framework for robotics, automation, and

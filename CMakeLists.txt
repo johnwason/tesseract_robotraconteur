@@ -41,8 +41,6 @@ add_executable(
     src/tasks_conv.cpp
     src/task_exec_gen_impl.cpp
     src/tesseract_robotics_impl.cpp
-    # src/tesseract_planner_impl.h
-    # src/tesseract_planner_impl.cpp
     ${RR_THUNK_HDRS}
     ${RR_THUNK_SRCS})
 
@@ -70,7 +68,6 @@ target_link_libraries(${PROJECT_NAME}_service PRIVATE Boost::boost console_bridg
 target_compile_options(${PROJECT_NAME}_service PRIVATE ${TESSERACT_COMPILE_OPTIONS_PRIVATE})
 target_compile_options(${PROJECT_NAME}_service PUBLIC ${TESSERACT_COMPILE_OPTIONS_PUBLIC})
 target_compile_definitions(${PROJECT_NAME}_service PUBLIC ${TESSERACT_COMPILE_DEFINITIONS})
-# target_clang_tidy(${PROJECT_NAME} ENABLE ${TESSERACT_ENABLE_CLANG_TIDY})
 target_cxx_version(${PROJECT_NAME}_service PUBLIC VERSION ${TESSERACT_CXX_VERSION})
 
 target_include_directories(

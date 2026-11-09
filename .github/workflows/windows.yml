@@ -62,7 +62,7 @@ jobs:
     - name: Build and Tests
       uses: johnwason/colcon-action@vcs_recursive
       with:
-        ccache-prefix: ${{ matrix.distro }}
+        ccache-prefix: ${{ matrix.os }}
         vcs-file: dependencies_windows.repos
         upstream-args: >-
           --cmake-args -G "Ninja" -DVCPKG_TARGET_TRIPLET=x64-windows-release
@@ -82,6 +82,6 @@ jobs:
       if: failure()
       uses: actions/upload-artifact@v7
       with:
-        name: ci-win-logs-${{ matrix.config.name }}
+        name: ci-win-logs-${{ matrix.os }}
         path: ./**/*.log
         retention-days: 7

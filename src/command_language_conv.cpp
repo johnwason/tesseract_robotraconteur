@@ -229,8 +229,6 @@ tesseract::command_language::CompositeInstruction CompositeInstructionFromRR(
     {
         std::vector<tesseract::command_language::InstructionPoly> instructions;
         RR_NULL_CHECK(composite_instruction->instructions);
-        // boost::range::transform(*composite_instruction->instructions, std::back_inserter(instructions),
-        // InstructionPolyFromRR);
         for (auto& i : *composite_instruction->instructions)
         {
             tesseract::command_language::InstructionPoly instr = InstructionPolyFromRR(i);
@@ -238,7 +236,6 @@ tesseract::command_language::CompositeInstruction CompositeInstructionFromRR(
         }
         ret.setInstructions(instructions);
     }
-    // ret.print();
     return ret;
 }
 

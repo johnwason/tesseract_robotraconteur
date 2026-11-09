@@ -157,7 +157,6 @@ std::tuple<rr_shapes::MeshPtr, rr_shapes::MaterialPtr> MeshToRR(const tesseract:
     if (mesh_textures)
     {
         ret->textures = RR::AllocateEmptyRRList<rr_shapes::MeshTexture>();
-        // boost::range::transform(*mesh_textures, std::back_inserter(*ret->textures), MeshTextureToRR);
         for (size_t i = 0; i < mesh_textures->size(); ++i)
         {
             ret->textures->push_back(MeshTextureToRR(*mesh_textures->at(i)));

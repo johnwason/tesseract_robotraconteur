@@ -21,8 +21,8 @@
  * limitations under the License.
  */
 
-#ifndef TESSERACT_ROBOTRAOUNTEUR_TESSERACT_ROBOTICS_IMPL_H
-#define TESSERACT_ROBOTRAOUNTEUR_TESSERACT_ROBOTICS_IMPL_H
+#ifndef TESSERACT_ROBOTRACONTEUR_TESSERACT_ROBOTICS_IMPL_H
+#define TESSERACT_ROBOTRACONTEUR_TESSERACT_ROBOTICS_IMPL_H
 
 #include <tesseract/common/macros.h>
 TESSERACT_COMMON_IGNORE_WARNINGS_PUSH
@@ -80,4 +80,4 @@ class TesseractRoboticsImpl : public virtual rr_tesseract::TesseractRobotics_def
 
 } // namespace tesseract_robotraconteur
 
-#endif // TESSERACT_ROBOTRAOUNTEUR_TESSERACT_ROBOTICS_IMPL_H
+#endif // TESSERACT_ROBOTRACONTEUR_TESSERACT_ROBOTICS_IMPL_H

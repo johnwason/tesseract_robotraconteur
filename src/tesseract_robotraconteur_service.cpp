@@ -1,5 +1,5 @@
 /**
- * @file tesseract_robotics_service.cpp
+ * @file tesseract_robotraconteur_service.cpp
  *
  * @author John Wason, PhD
  *
@@ -52,8 +52,6 @@ int main(int argc, char** argv)
         po::variables_map vm;
         po::store(po::command_line_parser(argc, argv).options(generic_).run(), vm);
         po::notify(vm);
-
-        // RobotRaconteur::Companion::RegisterStdRobDefServiceTypes();
 
         auto resource_locator = std::make_shared<tesseract::common::GeneralResourceLocator>();
 
