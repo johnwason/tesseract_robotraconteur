@@ -1,0 +1,22 @@
+name: Pre-commit
+
+on:
+  push:
+    branches:
+    - master
+    - 'dev**'
+  pull_request:
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-24.04
+    env:
+      SKIP: no-commit-to-branch
+    steps:
+    - uses: actions/checkout@v6
+    - uses: actions/setup-python@v6
+    - name: apt
+      run: |
+        sudo apt update
+        sudo apt install -y dos2unix
+    - uses: pre-commit/action@v3.0.1

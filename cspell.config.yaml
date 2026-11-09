@@ -1,0 +1,32 @@
+version: "0.2"
+allowCompoundWords: true
+ignorePaths:
+- build
+- install
+- .github/workflows
+- "*.svg"
+- ".gitignore"
+- ".cmake-format.yaml"
+- ".clang-tidy"
+- ".clang-format"
+- "LICENSE.txt"
+- "examples/urdf/*"
+dictionaryDefinitions:
+- name: custom-dictionary
+  path: ./.cspell/custom-dictionary.txt
+  addWords: true
+dictionaries:
+- custom-dictionary
+- companies
+- softwareTerms
+- programmingTerms
+- misc
+- python
+- cpp
+- markdown
+- public-licenses
+- git
+- en_us
+words: []
+ignoreWords: []
+import: []
