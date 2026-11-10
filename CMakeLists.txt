@@ -5,7 +5,6 @@ find_package(ros_industrial_cmake_boilerplate REQUIRED)
 extract_package_metadata(pkg)
 project(${pkg_extracted_name} VERSION ${pkg_extracted_version} LANGUAGES CXX)
 
-find_package(yaml-cpp REQUIRED)
 find_package(RobotRaconteur REQUIRED)
 find_package(RobotRaconteurCompanion REQUIRED)
 find_package(tesseract REQUIRED)
@@ -52,8 +51,6 @@ target_link_libraries(
             tesseract::motion_planners
             tesseract::common
             drekar-launch-process-cpp
-            jsoncpp_lib
-            yaml-cpp::yaml-cpp
             tesseract::motion_planners_simple
             tesseract::motion_planners_trajopt
             tesseract::motion_planners_trajopt_ifopt
@@ -61,10 +58,9 @@ target_link_libraries(
             tesseract::motion_planners_descartes
             tesseract::task_composer_planning_nodes
             tesseract::time_parameterization
-            tesseract::time_parameterization_isp
-            ${OpenCV_LIBS})
+            tesseract::time_parameterization_isp)
 
-target_link_libraries(${PROJECT_NAME}_service PRIVATE Boost::boost console_bridge::console_bridge)
+target_link_libraries(${PROJECT_NAME}_service PRIVATE Boost::boost)
 target_compile_options(${PROJECT_NAME}_service PRIVATE ${TESSERACT_COMPILE_OPTIONS_PRIVATE})
 target_compile_options(${PROJECT_NAME}_service PUBLIC ${TESSERACT_COMPILE_OPTIONS_PUBLIC})
 target_compile_definitions(${PROJECT_NAME}_service PUBLIC ${TESSERACT_COMPILE_DEFINITIONS})
