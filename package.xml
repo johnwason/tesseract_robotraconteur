@@ -8,7 +8,7 @@
 
   <license>Apache 2.0</license>
 
-  <url type="website">https://github.com/robotraconteur-contrib/tesseract_robotraconteur</url>
+  <url type="website">https://github.com/tesseract-robotics/tesseract_robotraconteur</url>
 
 
   <author email="wason@wasontech.com">John Wason</author>
@@ -27,7 +27,7 @@
   <depend>octomap</depend>
   <depend>drekar_launch_process_cpp</depend>
 
-  <export>    
+  <export>
     <build_type>cmake</build_type>
   </export>
 </package>

@@ -40,47 +40,47 @@ namespace tesseract_robotraconteur
 {
 namespace conv
 {
-    rr_shapes::BoxPtr BoxToRR(const tesseract::geometry::Box& box);
+rr_shapes::BoxPtr BoxToRR(const tesseract::geometry::Box& box);
 
-    tesseract::geometry::Box::Ptr BoxFromRR(const rr_shapes::BoxPtr& box);
+tesseract::geometry::Box::Ptr BoxFromRR(const rr_shapes::BoxPtr& box);
 
-    rr_shapes::CapsulePtr CapsuleToRR(const tesseract::geometry::Capsule& capsule);
+rr_shapes::CapsulePtr CapsuleToRR(const tesseract::geometry::Capsule& capsule);
 
-    tesseract::geometry::Capsule::Ptr CapsuleFromRR(const rr_shapes::CapsulePtr& capsule);
+tesseract::geometry::Capsule::Ptr CapsuleFromRR(const rr_shapes::CapsulePtr& capsule);
 
-    rr_shapes::ConePtr ConeToRR(const tesseract::geometry::Cone& cone);
+rr_shapes::ConePtr ConeToRR(const tesseract::geometry::Cone& cone);
 
-    tesseract::geometry::Cone::Ptr ConeFromRR(const rr_shapes::ConePtr& cone);
+tesseract::geometry::Cone::Ptr ConeFromRR(const rr_shapes::ConePtr& cone);
 
-    std::tuple<rr_shapes::MeshPtr, rr_shapes::MaterialPtr> MeshToRR(const tesseract::geometry::PolygonMesh& mesh);
+std::tuple<rr_shapes::MeshPtr, rr_shapes::MaterialPtr> MeshToRR(const tesseract::geometry::PolygonMesh& mesh);
 
-    tesseract::geometry::PolygonMesh::Ptr MeshFromRR(const rr_shapes::MeshPtr& mesh);
+tesseract::geometry::PolygonMesh::Ptr MeshFromRR(const rr_shapes::MeshPtr& mesh);
 
-    rr_shapes::CylinderPtr CylinderToRR(const tesseract::geometry::Cylinder& cylinder);
+rr_shapes::CylinderPtr CylinderToRR(const tesseract::geometry::Cylinder& cylinder);
 
-    tesseract::geometry::Cylinder::Ptr CylinderFromRR(const rr_shapes::CylinderPtr& cylinder);
+tesseract::geometry::Cylinder::Ptr CylinderFromRR(const rr_shapes::CylinderPtr& cylinder);
 
-    // TODO: octree
+// TODO: octree
 
-    rr_shapes::PlanePtr PlaneToRR(const tesseract::geometry::Plane& plane);
+rr_shapes::PlanePtr PlaneToRR(const tesseract::geometry::Plane& plane);
 
-    tesseract::geometry::Plane::Ptr PlaneFromRR(const rr_shapes::PlanePtr& plane);
+tesseract::geometry::Plane::Ptr PlaneFromRR(const rr_shapes::PlanePtr& plane);
 
-    rr_shapes::SpherePtr SphereToRR(const tesseract::geometry::Sphere& sphere);
+rr_shapes::SpherePtr SphereToRR(const tesseract::geometry::Sphere& sphere);
 
-    tesseract::geometry::Sphere::Ptr SphereFromRR(const rr_shapes::SpherePtr& sphere);
+tesseract::geometry::Sphere::Ptr SphereFromRR(const rr_shapes::SpherePtr& sphere);
 
-    tesseract::geometry::Geometry::Ptr GeometryFromRR(const RobotRaconteur::RRValuePtr& geom);
+tesseract::geometry::Geometry::Ptr GeometryFromRR(const RobotRaconteur::RRValuePtr& geom);
 
-    RobotRaconteur::RRValuePtr GeometryToRR(const tesseract::geometry::Geometry& geom);
+RobotRaconteur::RRValuePtr GeometryToRR(const tesseract::geometry::Geometry& geom);
 
-    rr_shapes::MaterialPtr MeshMaterialToRR(const tesseract::geometry::MeshMaterial& mesh_material);
+rr_shapes::MaterialPtr MeshMaterialToRR(const tesseract::geometry::MeshMaterial& mesh_material);
 
-    tesseract::geometry::MeshMaterial::Ptr MeshMaterialFromRR(const rr_shapes::MaterialPtr& mesh_material);
+tesseract::geometry::MeshMaterial::Ptr MeshMaterialFromRR(const rr_shapes::MaterialPtr& mesh_material);
 
-    rr_shapes::MeshTexturePtr MeshTextureToRR(tesseract::geometry::MeshTexture& mesh_texture);
+rr_shapes::MeshTexturePtr MeshTextureToRR(tesseract::geometry::MeshTexture& mesh_texture);
 
-    tesseract::geometry::MeshTexture::Ptr MeshTextureFromRR(const rr_shapes::MeshTexturePtr& mesh_texture);
+tesseract::geometry::MeshTexture::Ptr MeshTextureFromRR(const rr_shapes::MeshTexturePtr& mesh_texture);
 
 } // namespace conv
 } // namespace tesseract_robotraconteur

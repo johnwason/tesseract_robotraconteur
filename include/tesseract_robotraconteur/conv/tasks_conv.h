@@ -41,15 +41,20 @@ namespace tesseract_robotraconteur
 class TesseractRoboticsImpl;
 namespace conv
 {
-    RobotRaconteur::RRMapPtr<std::string,rr_tasks::TaskComposerKey> TaskComposerKeysToRR(const tesseract::task_composer::TaskComposerKeys& keys);
+RobotRaconteur::RRMapPtr<std::string, rr_tasks::TaskComposerKey> TaskComposerKeysToRR(
+    const tesseract::task_composer::TaskComposerKeys& keys);
 
-    tesseract::common::AnyPoly TaskPolyFromRR(const RobotRaconteur::RRValuePtr& data, const RR_SHARED_PTR<TesseractRoboticsImpl>& server);
+tesseract::common::AnyPoly TaskPolyFromRR(const RobotRaconteur::RRValuePtr& data,
+                                          const RR_SHARED_PTR<TesseractRoboticsImpl>& server);
 
-    RobotRaconteur::RRValuePtr TaskPolyToRR(const tesseract::common::AnyPoly& data);
+RobotRaconteur::RRValuePtr TaskPolyToRR(const tesseract::common::AnyPoly& data);
 
-    RobotRaconteur::RRMapPtr<std::string,RobotRaconteur::RRValue> TaskComposerDataStorageToRR(const tesseract::task_composer::TaskComposerDataStorage::Ptr& data_storage);
+RobotRaconteur::RRMapPtr<std::string, RobotRaconteur::RRValue> TaskComposerDataStorageToRR(
+    const tesseract::task_composer::TaskComposerDataStorage::Ptr& data_storage);
 
-    tesseract::task_composer::TaskComposerDataStorage::Ptr TaskComposerDataStorageFromRR(const RobotRaconteur::RRMapPtr<std::string,RobotRaconteur::RRValue>& data_storage, const RR_SHARED_PTR<TesseractRoboticsImpl>& server);
+tesseract::task_composer::TaskComposerDataStorage::Ptr TaskComposerDataStorageFromRR(
+    const RobotRaconteur::RRMapPtr<std::string, RobotRaconteur::RRValue>& data_storage,
+    const RR_SHARED_PTR<TesseractRoboticsImpl>& server);
 } // namespace conv
 } // namespace tesseract_robotraconteur
 

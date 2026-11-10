@@ -50,21 +50,27 @@ rr_command::JointWaypointPtr JointWaypointToRR(const tesseract::command_language
 
 tesseract::command_language::JointWaypoint JointWaypointFromRR(const rr_command::JointWaypointPtr& joint_waypoint);
 
-rr_command::CartesianWaypointPtr CartesianWaypointToRR(const tesseract::command_language::CartesianWaypointPoly& cartesian_waypoint);
+rr_command::CartesianWaypointPtr CartesianWaypointToRR(
+    const tesseract::command_language::CartesianWaypointPoly& cartesian_waypoint);
 
-tesseract::command_language::CartesianWaypoint CartesianWaypointFromRR(const rr_command::CartesianWaypointPtr& cartesian_waypoint);
+tesseract::command_language::CartesianWaypoint CartesianWaypointFromRR(
+    const rr_command::CartesianWaypointPtr& cartesian_waypoint);
 
 rr_command::StateWaypointPtr StateWaypointToRR(const tesseract::command_language::StateWaypointPoly& state_waypoint);
 
 tesseract::command_language::StateWaypoint StateWaypointFromRR(const rr_command::StateWaypointPtr& state_waypoint);
 
-rr_command::MoveInstructionPtr MoveInstructionToRR(const tesseract::command_language::MoveInstructionPoly& move_instruction);
+rr_command::MoveInstructionPtr MoveInstructionToRR(
+    const tesseract::command_language::MoveInstructionPoly& move_instruction);
 
-tesseract::command_language::MoveInstructionPoly MoveInstructionFromRR(const rr_command::MoveInstructionPtr& move_instruction);
+tesseract::command_language::MoveInstructionPoly MoveInstructionFromRR(
+    const rr_command::MoveInstructionPtr& move_instruction);
 
-rr_command::CompositeInstructionPtr CompositeInstructionToRR(const tesseract::command_language::CompositeInstruction& composite_instruction);
+rr_command::CompositeInstructionPtr CompositeInstructionToRR(
+    const tesseract::command_language::CompositeInstruction& composite_instruction);
 
-tesseract::command_language::CompositeInstruction CompositeInstructionFromRR(const rr_command::CompositeInstructionPtr& composite_instruction);
+tesseract::command_language::CompositeInstruction CompositeInstructionFromRR(
+    const rr_command::CompositeInstructionPtr& composite_instruction);
 
 RobotRaconteur::RRValuePtr WaypointPolyToRR(const tesseract::command_language::WaypointPoly& waypoint);
 

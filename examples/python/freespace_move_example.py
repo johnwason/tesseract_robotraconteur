@@ -15,7 +15,7 @@
 #     --srdf-file=/ws/install/share/tesseract/support/urdf/abb_irb2400.srdf \
 #     --task-plugin-config-file=/ws/install/share/tesseract_planning/task_composer/config/task_composer_plugins.yaml
 #
-# Once the service is running, the client can be run from another terminal. The robotraconteur and 
+# Once the service is running, the client can be run from another terminal. The robotraconteur and
 # robotraconteurcomanion python packages must be installed. Install using the following commands:
 #
 #    python3 -m pip install robotraconteur robotraconteurcompanion
@@ -39,8 +39,9 @@ from RobotRaconteurCompanion.Util.GeometryUtil import GeometryUtil
 from RobotRaconteurCompanion.Util.UuidUtil import UuidUtil
 import numpy as np
 
+
 def main():
-    
+
     # Connect to the service. In this case, a localhost url is used. If the service were running
     # on a remote node, the URL would be "rr+tcp://hostname.example.com:port" for TCP. An IP
     # address can also be used directly.
@@ -53,19 +54,19 @@ def main():
     geom = GeometryUtil(client_obj=c)
     uuid_util = UuidUtil(client_obj=c)
 
-
     # Retrieve the constants and structure types from the service. Robot Raconteur provides
     # plug-and-play capabilities, so this information is provided at runtime by the service.
     # The client does not need to be configured with this information, it is provided
     # automatically by the service.
-    command_lang_const = RRN.GetConstants("experimental.tesseract_robotics.command_language",c)
-    action_const = RRN.GetConstants("com.robotraconteur.action",c)
-    cart_wp_type = RRN.GetStructureType("experimental.tesseract_robotics.command_language.CartesianWaypoint",c)
-    move_instr_type = RRN.GetStructureType("experimental.tesseract_robotics.command_language.MoveInstruction",c)
-    composite_instr_type = RRN.GetStructureType("experimental.tesseract_robotics.command_language.CompositeInstruction",c)
-    manip_info_type = RRN.GetStructureType("experimental.tesseract_robotics.common.ManipulatorInfo",c)
-    task_exec_input_type = RRN.GetStructureType("experimental.tesseract_robotics.tasks.TaskExecutorInput",c)
-    env_handle_type = RRN.GetStructureType("experimental.tesseract_robotics.environment.EnvironmentHandle",c)
+    command_lang_const = RRN.GetConstants("experimental.tesseract_robotics.command_language", c)
+    action_const = RRN.GetConstants("com.robotraconteur.action", c)
+    cart_wp_type = RRN.GetStructureType("experimental.tesseract_robotics.command_language.CartesianWaypoint", c)
+    move_instr_type = RRN.GetStructureType("experimental.tesseract_robotics.command_language.MoveInstruction", c)
+    composite_instr_type = RRN.GetStructureType(
+        "experimental.tesseract_robotics.command_language.CompositeInstruction", c)
+    manip_info_type = RRN.GetStructureType("experimental.tesseract_robotics.common.ManipulatorInfo", c)
+    task_exec_input_type = RRN.GetStructureType("experimental.tesseract_robotics.tasks.TaskExecutorInput", c)
+    env_handle_type = RRN.GetStructureType("experimental.tesseract_robotics.environment.EnvironmentHandle", c)
 
     # Get the available task pipeline information from the service. Tesseract task pipelines
     # execute planning and other operations
@@ -87,7 +88,7 @@ def main():
     def build_move_instr(xyz, rpy):
         # Create a cartesian waypoint. Joint waypoints are also available.
         wp = cart_wp_type()
-        wp.transform = geom.xyz_rpy_to_transform(xyz,rpy)
+        wp.transform = geom.xyz_rpy_to_transform(xyz, rpy)
 
         # Create a move instruction and set the waypoint
         instr = move_instr_type()
@@ -98,9 +99,9 @@ def main():
         return RR.VarValue(instr, "experimental.tesseract_robotics.command_language.MoveInstruction")
 
     # Create the instructions
-    instr1 = build_move_instr([0.8, -0.3, 1.455], np.deg2rad([0,90,0]))
-    instr2 = build_move_instr([0.8, 0.3, 1.455], np.deg2rad([0,90,0]))
-    instr3 = build_move_instr([0.8, 0.5, 1.455], np.deg2rad([0,90,0]))
+    instr1 = build_move_instr([0.8, -0.3, 1.455], np.deg2rad([0, 90, 0]))
+    instr2 = build_move_instr([0.8, 0.3, 1.455], np.deg2rad([0, 90, 0]))
+    instr3 = build_move_instr([0.8, 0.5, 1.455], np.deg2rad([0, 90, 0]))
 
     # Create and configure the manipulator info structure
     manip_info = manip_info_type()
@@ -111,7 +112,7 @@ def main():
     # Create and configure the composite instruction
     composite = composite_instr_type()
     composite.order = command_lang_const["CompositeInstructionOrder"]["ordered"]
-    composite.instructions = [instr1, instr2] #, instr3]
+    composite.instructions = [instr1, instr2]  # , instr3]
     composite.manipulator_info = manip_info
     composite.uuid = uuid_util.NewRandomUuid()
     composite_input = RR.VarValue(composite, "experimental.tesseract_robotics.command_language.CompositeInstruction")
@@ -144,7 +145,7 @@ def main():
         if not res:
             break
         status = status1
-    
+
     # Check the status of the pipeline take make sure it completed successfully
     assert status.action_status == action_const["ActionStatusCode"]["complete"]
 
@@ -162,6 +163,7 @@ def main():
     print(wp_positions)
 
     # TODO: plot result in viewer!
-        
+
+
 if __name__ == '__main__':
     main()

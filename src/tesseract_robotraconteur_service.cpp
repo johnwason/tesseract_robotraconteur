@@ -1,5 +1,5 @@
 /**
- * @file tesseract_robotics_service.cpp
+ * @file tesseract_robotraconteur_service.cpp
  *
  * @author John Wason, PhD
  *
@@ -36,7 +36,7 @@ using namespace tesseract_robotraconteur;
 
 namespace po = boost::program_options;
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
     try
     {
@@ -45,17 +45,13 @@ int main(int argc, char **argv)
         std::string task_plugin_config_file;
 
         po::options_description generic_("Allowed options");
-        generic_.add_options()
-            ("help,h", "print usage message")
-            ("urdf-file", po::value(&urdf_fname), "URDF filename")
-            ("srdf-file", po::value(&srdf_fname), "SRDF filename")
-            ("task-plugin-config-file", po::value(&task_plugin_config_file), "Task composer plugin configuration file");
+        generic_.add_options()("help,h", "print usage message")("urdf-file", po::value(&urdf_fname), "URDF filename")(
+            "srdf-file", po::value(&srdf_fname), "SRDF filename")(
+            "task-plugin-config-file", po::value(&task_plugin_config_file), "Task composer plugin configuration file");
 
         po::variables_map vm;
         po::store(po::command_line_parser(argc, argv).options(generic_).run(), vm);
         po::notify(vm);
-
-        // RobotRaconteur::Companion::RegisterStdRobDefServiceTypes();
 
         auto resource_locator = std::make_shared<tesseract::common::GeneralResourceLocator>();
 
@@ -92,18 +88,16 @@ int main(int argc, char **argv)
         auto tesseract_server = std::make_shared<tesseract::task_composer::TaskComposerServer>();
         tesseract_server->loadConfig(task_plugin_config_file_path, *resource_locator);
 
-
         auto obj = RR_MAKE_SHARED<TesseractRoboticsImpl>(env, tesseract_server);
         obj->Init();
 
-        RobotRaconteurNodeSetup node_setup(RobotRaconteurNode::sp(), ROBOTRACONTEUR_SERVICE_TYPES, "org.swri.tesseract", 63158, 
+        RobotRaconteurNodeSetup node_setup(
+            RobotRaconteurNode::sp(), ROBOTRACONTEUR_SERVICE_TYPES, "org.swri.tesseract", 63158,
             RobotRaconteurNodeSetupFlags_SERVER_DEFAULT | RobotRaconteurNodeSetupFlags_JUMBO_MESSAGE,
-            RobotRaconteurNodeSetupFlags_SERVER_DEFAULT_ALLOWED_OVERRIDE,
-            argc, argv);
+            RobotRaconteurNodeSetupFlags_SERVER_DEFAULT_ALLOWED_OVERRIDE, argc, argv);
 
-        auto context = RobotRaconteurNode::s()->RegisterService("tesseract","experimental.tesseract_robotics", obj);
+        auto context = RobotRaconteurNode::s()->RegisterService("tesseract", "experimental.tesseract_robotics", obj);
         context->AddExtraImport("experimental.tesseract_robotics.command_language");
-
 
         std::cout << "Press Ctrl-C to quit" << std::endl;
         drekar_launch_process_cpp::CWaitForExit wait_exit;

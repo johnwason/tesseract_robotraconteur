@@ -25,11 +25,10 @@
 #include "tesseract_robotraconteur/conv/common_conv.h"
 #include "RobotRaconteurCompanion/Converters/EigenConverters.h"
 
-
 #include <boost/range/algorithm.hpp>
 
-namespace RR=RobotRaconteur;
-namespace RRC_Eigen=RobotRaconteur::Companion::Converters::Eigen;
+namespace RR = RobotRaconteur;
+namespace RRC_Eigen = RobotRaconteur::Companion::Converters::Eigen;
 
 #define RR_COMMAND_LANG_PREFIX "experimental.tesseract_robotics.command_language"
 
@@ -63,7 +62,8 @@ tesseract::command_language::JointWaypoint JointWaypointFromRR(const rr_command:
     return ret;
 }
 
-rr_command::CartesianWaypointPtr CartesianWaypointToRR(const tesseract::command_language::CartesianWaypointPoly& cartesian_waypoint)
+rr_command::CartesianWaypointPtr CartesianWaypointToRR(
+    const tesseract::command_language::CartesianWaypointPoly& cartesian_waypoint)
 {
     rr_command::CartesianWaypointPtr ret(new rr_command::CartesianWaypoint());
     ret->transform = RRC_Eigen::ToTransform(cartesian_waypoint.getTransform());
@@ -74,7 +74,8 @@ rr_command::CartesianWaypointPtr CartesianWaypointToRR(const tesseract::command_
     return ret;
 }
 
-tesseract::command_language::CartesianWaypoint CartesianWaypointFromRR(const rr_command::CartesianWaypointPtr& cartesian_waypoint)
+tesseract::command_language::CartesianWaypoint CartesianWaypointFromRR(
+    const rr_command::CartesianWaypointPtr& cartesian_waypoint)
 {
     RR_NULL_CHECK(cartesian_waypoint);
     tesseract::command_language::CartesianWaypoint ret;
@@ -129,7 +130,8 @@ static boost::uuids::uuid UuidFromRR(const com::robotraconteur::uuid::UUID& uuid
     return ret;
 }
 
-rr_command::MoveInstructionPtr MoveInstructionToRR(const tesseract::command_language::MoveInstructionPoly& move_instruction)
+rr_command::MoveInstructionPtr MoveInstructionToRR(
+    const tesseract::command_language::MoveInstructionPoly& move_instruction)
 {
     rr_command::MoveInstructionPtr ret(new rr_command::MoveInstruction());
     ret->uuid = UuidToRR(move_instruction.getUUID());
@@ -137,32 +139,36 @@ rr_command::MoveInstructionPtr MoveInstructionToRR(const tesseract::command_lang
     ret->waypoint = WaypointPolyToRR(move_instruction.getWaypoint());
     ret->manipulator_info = ManipulatorInfoToRR(move_instruction.getManipulatorInfo());
     ret->profile = move_instruction.getProfile();
-    
+
     // TODO: overrides
     // ret->path_profile = ...
     // ret->profile_overrides = ...
 
     ret->move_type = (rr_command::MoveInstructionType::MoveInstructionType)move_instruction.getMoveType();
     ret->description = move_instruction.getDescription();
-    
+
     return ret;
 }
 
-tesseract::command_language::MoveInstructionPoly MoveInstructionFromRR(const rr_command::MoveInstructionPtr& move_instruction)
+tesseract::command_language::MoveInstructionPoly MoveInstructionFromRR(
+    const rr_command::MoveInstructionPtr& move_instruction)
 {
     RR_NULL_CHECK(move_instruction);
-    
+
     RR_NULL_CHECK(move_instruction->waypoint);
     tesseract::command_language::WaypointPoly waypoint_poly;
-    if (move_instruction->waypoint->RRType() == (RR_COMMAND_LANG_PREFIX "." "JointWaypoint"))
+    if (move_instruction->waypoint->RRType() == (RR_COMMAND_LANG_PREFIX "."
+                                                                        "JointWaypoint"))
     {
         waypoint_poly = JointWaypointFromRR(RR::rr_cast<rr_command::JointWaypoint>(move_instruction->waypoint));
     }
-    else if (move_instruction->waypoint->RRType() == (RR_COMMAND_LANG_PREFIX "." "CartesianWaypoint"))
+    else if (move_instruction->waypoint->RRType() == (RR_COMMAND_LANG_PREFIX "."
+                                                                             "CartesianWaypoint"))
     {
         waypoint_poly = CartesianWaypointFromRR(RR::rr_cast<rr_command::CartesianWaypoint>(move_instruction->waypoint));
     }
-    else if (move_instruction->waypoint->RRType() == (RR_COMMAND_LANG_PREFIX "." "StateWaypoint"))
+    else if (move_instruction->waypoint->RRType() == (RR_COMMAND_LANG_PREFIX "."
+                                                                             "StateWaypoint"))
     {
         waypoint_poly = StateWaypointFromRR(RR::rr_cast<rr_command::StateWaypoint>(move_instruction->waypoint));
     }
@@ -170,10 +176,11 @@ tesseract::command_language::MoveInstructionPoly MoveInstructionFromRR(const rr_
     {
         throw RR::InvalidArgumentException("Unknown waypoint type");
     }
-    tesseract::command_language::MoveInstruction ret(waypoint_poly, (tesseract::command_language::MoveInstructionType)move_instruction->move_type);
+    tesseract::command_language::MoveInstruction ret(
+        waypoint_poly, (tesseract::command_language::MoveInstructionType)move_instruction->move_type);
     ret.setUUID(UuidFromRR(move_instruction->uuid));
     ret.setParentUUID(UuidFromRR(move_instruction->parent_uuid));
-    if (move_instruction->manipulator_info)        
+    if (move_instruction->manipulator_info)
         ret.setManipulatorInfo(ManipulatorInfoFromRR(move_instruction->manipulator_info));
     ret.setProfile(move_instruction->profile);
 
@@ -184,7 +191,8 @@ tesseract::command_language::MoveInstructionPoly MoveInstructionFromRR(const rr_
     return ret;
 }
 
-rr_command::CompositeInstructionPtr CompositeInstructionToRR(const tesseract::command_language::CompositeInstruction& composite_instruction)
+rr_command::CompositeInstructionPtr CompositeInstructionToRR(
+    const tesseract::command_language::CompositeInstruction& composite_instruction)
 {
     rr_command::CompositeInstructionPtr ret(new rr_command::CompositeInstruction());
     ret->order = (rr_command::CompositeInstructionOrder::CompositeInstructionOrder)composite_instruction.getOrder();
@@ -202,13 +210,14 @@ rr_command::CompositeInstructionPtr CompositeInstructionToRR(const tesseract::co
     return ret;
 }
 
-tesseract::command_language::CompositeInstruction CompositeInstructionFromRR(const rr_command::CompositeInstructionPtr& composite_instruction)
+tesseract::command_language::CompositeInstruction CompositeInstructionFromRR(
+    const rr_command::CompositeInstructionPtr& composite_instruction)
 {
     RR_NULL_CHECK(composite_instruction);
     tesseract::command_language::CompositeInstruction ret;
 
     // TODO: setOrder ?
-    //ret.setOrder((tesseract::command_language::CompositeInstructionOrder)composite_instruction->order);
+    // ret.setOrder((tesseract::command_language::CompositeInstructionOrder)composite_instruction->order);
     ret.setUUID(UuidFromRR(composite_instruction->uuid));
     ret.setParentUUID(UuidFromRR(composite_instruction->parent_uuid));
     ret.setDescription(composite_instruction->description);
@@ -218,17 +227,15 @@ tesseract::command_language::CompositeInstruction CompositeInstructionFromRR(con
     // ret.setProfileOverrides(...
     ret.setManipulatorInfo(ManipulatorInfoFromRR(composite_instruction->manipulator_info));
     {
-    std::vector<tesseract::command_language::InstructionPoly> instructions;
-    RR_NULL_CHECK(composite_instruction->instructions);
-    //boost::range::transform(*composite_instruction->instructions, std::back_inserter(instructions), InstructionPolyFromRR);
-    for (auto& i : *composite_instruction->instructions)
-    {
-        tesseract::command_language::InstructionPoly instr = InstructionPolyFromRR(i);
-        instructions.push_back(instr);
+        std::vector<tesseract::command_language::InstructionPoly> instructions;
+        RR_NULL_CHECK(composite_instruction->instructions);
+        for (auto& i : *composite_instruction->instructions)
+        {
+            tesseract::command_language::InstructionPoly instr = InstructionPolyFromRR(i);
+            instructions.push_back(instr);
+        }
+        ret.setInstructions(instructions);
     }
-    ret.setInstructions(instructions);
-    }
-    // ret.print();
     return ret;
 }
 
@@ -271,11 +278,13 @@ RR::RRValuePtr InstructionPolyToRR(const tesseract::command_language::Instructio
 tesseract::command_language::InstructionPoly InstructionPolyFromRR(const RR::RRValuePtr& instruction)
 {
     RR_NULL_CHECK(instruction);
-    if (instruction->RRType() == (RR_COMMAND_LANG_PREFIX "." "MoveInstruction"))
+    if (instruction->RRType() == (RR_COMMAND_LANG_PREFIX "."
+                                                         "MoveInstruction"))
     {
         return MoveInstructionFromRR(RR::rr_cast<rr_command::MoveInstruction>(instruction));
     }
-    else if (instruction->RRType() == (RR_COMMAND_LANG_PREFIX "." "CompositeInstruction"))
+    else if (instruction->RRType() == (RR_COMMAND_LANG_PREFIX "."
+                                                              "CompositeInstruction"))
     {
         return CompositeInstructionFromRR(RR::rr_cast<rr_command::CompositeInstruction>(instruction));
     }
@@ -288,15 +297,18 @@ tesseract::command_language::InstructionPoly InstructionPolyFromRR(const RR::RRV
 tesseract::command_language::WaypointPoly WaypointPolyFromRR(const RR::RRValuePtr& waypoint)
 {
     RR_NULL_CHECK(waypoint);
-    if (waypoint->RRType() == (RR_COMMAND_LANG_PREFIX "." "JointWaypoint"))
+    if (waypoint->RRType() == (RR_COMMAND_LANG_PREFIX "."
+                                                      "JointWaypoint"))
     {
         return JointWaypointFromRR(RR::rr_cast<rr_command::JointWaypoint>(waypoint));
     }
-    else if (waypoint->RRType() == (RR_COMMAND_LANG_PREFIX "." "CartesianWaypoint"))
+    else if (waypoint->RRType() == (RR_COMMAND_LANG_PREFIX "."
+                                                           "CartesianWaypoint"))
     {
         return CartesianWaypointFromRR(RR::rr_cast<rr_command::CartesianWaypoint>(waypoint));
     }
-    else if (waypoint->RRType() == (RR_COMMAND_LANG_PREFIX "." "StateWaypoint"))
+    else if (waypoint->RRType() == (RR_COMMAND_LANG_PREFIX "."
+                                                           "StateWaypoint"))
     {
         return StateWaypointFromRR(RR::rr_cast<rr_command::StateWaypoint>(waypoint));
     }

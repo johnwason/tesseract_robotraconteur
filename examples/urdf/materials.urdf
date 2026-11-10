@@ -1,5 +1,5 @@
 <robot name="mesh_viewer" tesseract:make_convex="true">
-  
+
   <link name="world"/>
   <link name="mesh_gltf2_link">
     <visual>
