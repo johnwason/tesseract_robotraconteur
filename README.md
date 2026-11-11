@@ -32,34 +32,46 @@ The service can be run as a local executable or using Docker. It is recommended 
 
 The service is available on [Docker Hub](https://hub.docker.com/r/wasontech/tesseract_robotraconteur).
 
-Run the service using the following command:
+Run the service with the ABB IRB2400 example scene included in the image:
 
 ```bash
 sudo docker run --rm --net=host \
   -v /var/run/robotraconteur:/var/run/robotraconteur \
   -v /var/lib/robotraconteur:/var/lib/robotraconteur \
-  -v /ws/install/share:/res \
-  -e TESSERACT_RESOURCE_PATH=/res \
-  -e URDF_FILE=/res/tesseract_support/urdf/abb_irb2400.urdf \
-  -e SRDF_FILE=/res/tesseract_support/urdf/abb_irb2400.srdf \
   docker.io/wasontech/tesseract_robotraconteur
 ```
 
-This relatively complex command is required to allow the service to run in the Docker container and
-still be able to find the Robot Raconteur transport and discovery services. With
-`--net=host` the service will use the host network stack. This is required for auto-discovery to work.
+The volume mounts let the service in the container find the Robot Raconteur transport and discovery
+services. With `--net=host` the service uses the host network stack, which is required for auto-discovery.
 
+To load a different robot, mount its resources into the container and set the environment variables.
+In this example the host directory `/path/to/resources` is mounted to `/res`:
 
-The following environment variables are available:
+```bash
+sudo docker run --rm --net=host \
+  -v /var/run/robotraconteur:/var/run/robotraconteur \
+  -v /var/lib/robotraconteur:/var/lib/robotraconteur \
+  -v /path/to/resources:/res \
+  -e TESSERACT_RESOURCE_PATH=/res:/ws/install/share \
+  -e URDF_FILE=/res/my_robot/urdf/my_robot.urdf \
+  -e SRDF_FILE=/res/my_robot/urdf/my_robot.srdf \
+  docker.io/wasontech/tesseract_robotraconteur
+```
 
-* `TESSERACT_RESOURCE_PATH`: This is the path for the resource loader to search for packages.
-  Paths are separated with `:` (Unix) or `;` (Windows). The resource files will need to be
-  mounted into the container. In this example, the resource directory `/ws/install/share` is
- mounted to `/res` in the container, and the environment variable is set to `/res`.
-* `URDF_FILE`: The path to the URDF file to load. This is relative to the filesystem in the container.
-* `SRDF_FILE`: The path to the SRDF file to load. This is relative to the filesystem in the container.
-* `TASK_PLUGIN_CONFIG_FILE`: The path to the task plugin config file to load. For
-  most cases this is not required and the default will be used. This is relative to the filesystem in the container.
+The following environment variables are available. Paths are in the container's filesystem.
+
+* `TESSERACT_RESOURCE_PATH`: The paths the resource loader searches for packages, separated with `:`.
+  Defaults to `/ws/install/share`.
+* `URDF_FILE`: The URDF file to load. Defaults to `/ws/install/share/tesseract/support/urdf/abb_irb2400.urdf`.
+* `SRDF_FILE`: The SRDF file to load. Defaults to `/ws/install/share/tesseract/support/urdf/abb_irb2400.srdf`.
+* `TASK_PLUGIN_CONFIG_FILE`: The task plugin config file to load. The default is the configuration
+  installed with `tesseract_planning` and is suitable for most cases.
+
+To build the image from this repository:
+
+```bash
+docker build -t tesseract_robotraconteur .
+```
 
 ### Building and Running the Service locally
 
