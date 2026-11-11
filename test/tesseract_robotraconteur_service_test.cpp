@@ -108,12 +108,7 @@ class ServiceEnvironment : public ::testing::Environment
             {}
             client.reset();
         }
-        int exit_code = process.Stop(30000);
-#ifndef _WIN32
-        EXPECT_EQ(exit_code, 0) << "Service did not shut down cleanly on SIGINT";
-#else
-        (void)exit_code;
-#endif
+        EXPECT_EQ(process.Stop(30000), 0) << "Service did not shut down cleanly";
         node_setup.reset();
     }
 

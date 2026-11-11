@@ -88,8 +88,8 @@ void ServiceProcess::Start(const std::string& executable, const std::vector<std:
     PROCESS_INFORMATION process_info{};
     std::vector<char> command_line_buf(command_line.begin(), command_line.end());
     command_line_buf.push_back('\0');
-    if (!CreateProcessA(executable.c_str(), command_line_buf.data(), nullptr, nullptr, TRUE, CREATE_NEW_PROCESS_GROUP,
-                        nullptr, nullptr, &startup_info, &process_info))
+    if (!CreateProcessA(executable.c_str(), command_line_buf.data(), nullptr, nullptr, TRUE, 0, nullptr, nullptr,
+                        &startup_info, &process_info))
     {
         throw std::runtime_error("Could not start " + executable);
     }
@@ -100,6 +100,25 @@ void ServiceProcess::Start(const std::string& executable, const std::vector<std:
 
 bool ServiceProcess::IsRunning() { return process_handle && WaitForSingleObject(process_handle, 0) == WAIT_TIMEOUT; }
 
+// drekar_launch_process_cpp::CWaitForExit waits on a message-only window with this class name and exits when
+// the window receives WM_CLOSE. This is how drekar-launch closes processes on Windows.
+static bool PostDrekarClose(DWORD process_id)
+{
+    bool found = false;
+    HWND hwnd = nullptr;
+    while ((hwnd = FindWindowExA(HWND_MESSAGE, hwnd, "drekar_message_window", nullptr)) != nullptr)
+    {
+        DWORD window_process_id = 0;
+        GetWindowThreadProcessId(hwnd, &window_process_id);
+        if (window_process_id == process_id)
+        {
+            PostMessageA(hwnd, WM_CLOSE, 0, 0);
+            found = true;
+        }
+    }
+    return found;
+}
+
 int ServiceProcess::Stop(int timeout_ms)
 {
     if (!process_handle)
@@ -107,7 +126,12 @@ int ServiceProcess::Stop(int timeout_ms)
         return -1;
     }
     int ret = -1;
-    GenerateConsoleCtrlEvent(CTRL_BREAK_EVENT, process_id);
+    // The window is created when the service starts waiting for exit, so retry until it is found
+    auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(timeout_ms);
+    while (IsRunning() && !PostDrekarClose(process_id) && std::chrono::steady_clock::now() < deadline)
+    {
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    }
     if (WaitForSingleObject(process_handle, timeout_ms) == WAIT_OBJECT_0)
     {
         DWORD exit_code = 0;

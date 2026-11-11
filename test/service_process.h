@@ -45,7 +45,9 @@ class ServiceProcess
 
     bool IsRunning();
 
-    // Requests a graceful shutdown (SIGINT, or CTRL_BREAK on Windows) and waits for the process to exit.
+    // Requests a graceful shutdown the way drekar-launch does, which drekar_launch_process_cpp::CWaitForExit in the
+    // service handles: SIGINT on POSIX, or WM_CLOSE to the drekar message window on Windows. Then waits for the
+    // process to exit.
     // The process is killed if it does not exit within timeout_ms. Returns the exit code, or -1 if the
     // process was killed or did not exit normally.
     int Stop(int timeout_ms);
