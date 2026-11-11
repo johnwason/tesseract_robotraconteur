@@ -57,6 +57,8 @@ class TaskExecGenImpl : public virtual RobotRaconteur::Companion::Util::AsyncTas
     virtual void AbortRequested() override;
 
   protected:
+    void AbortTask();
+
     tesseract::task_composer::TaskComposerServer::Ptr tesseract_server;
     std::string executor_name;
     const tesseract::task_composer::TaskComposerNode& node;

@@ -88,21 +88,31 @@ std::tuple<rr_shapes::MeshPtr, rr_shapes::MaterialPtr> MeshToRR(const tesseract:
     rr_shapes::MeshPtr ret(new rr_shapes::Mesh());
     rr_shapes::MaterialPtr ret_material;
 
-    if ((static_cast<long>(mesh.getFaceCount()) * 4) != mesh.getFaces()->size())
+    // Tesseract faces are stored as [n, v_0, ..., v_n-1, n, ...]. Faces with more than three vertices (for
+    // example convex hulls) are fan triangulated.
+    auto& faces = *mesh.getFaces();
+    const Eigen::Index faces_size = faces.size();
+    size_t triangle_count = 0;
+    for (Eigen::Index i = 0; i < faces_size; i += faces[i] + 1)
     {
-        std::cerr << "mesh.getFaceCount() " << mesh.getFaceCount() << " mesh.getFaces()->size() "
-                  << mesh.getFaces()->size() << std::endl;
-        // throw RR::InvalidArgumentException("Mesh is not triangular");
+        if (faces[i] < 3 || i + faces[i] >= faces_size)
+        {
+            throw RR::InvalidArgumentException("Invalid mesh face data");
+        }
+        triangle_count += static_cast<size_t>(faces[i] - 2);
     }
 
-    ret->triangles = RR::AllocateEmptyRRNamedArray<rr_shapes::MeshTriangle>(mesh.getFaceCount());
-    auto& faces = *mesh.getFaces();
-    for (size_t i = 0; i < mesh.getFaceCount(); ++i)
+    ret->triangles = RR::AllocateEmptyRRNamedArray<rr_shapes::MeshTriangle>(triangle_count);
+    size_t triangle_index = 0;
+    for (Eigen::Index i = 0; i < faces_size; i += faces[i] + 1)
     {
-        rr_shapes::MeshTriangle& triangle = ret->triangles->at(i);
-        triangle.s.v1 = faces[i * 4 + 1];
-        triangle.s.v2 = faces[i * 4 + 2];
-        triangle.s.v3 = faces[i * 4 + 3];
+        for (int j = 2; j < faces[i]; ++j)
+        {
+            rr_shapes::MeshTriangle& triangle = ret->triangles->at(triangle_index++);
+            triangle.s.v1 = faces[i + 1];
+            triangle.s.v2 = faces[i + j];
+            triangle.s.v3 = faces[i + j + 1];
+        }
     }
 
     ret->vertices = RR::AllocateEmptyRRNamedArray<rr_geom::Point>(mesh.getVertexCount());
@@ -197,7 +207,7 @@ tesseract::geometry::PolygonMesh::Ptr MeshFromRR(const rr_shapes::MeshPtr& mesh)
         faces_ref[i * 4 + 3] = triangle.s.v3;
     }
 
-    int face_count = boost::numeric_cast<const int&>(mesh->triangles->size());
+    int face_count = boost::numeric_cast<int>(mesh->triangles->size());
 
     auto vertices = std::make_shared<tesseract::common::VectorVector3d>(mesh->vertices->size());
     auto& vertices_ref = *vertices;
@@ -236,7 +246,8 @@ tesseract::geometry::PolygonMesh::Ptr MeshFromRR(const rr_shapes::MeshPtr& mesh)
     std::shared_ptr<std::vector<tesseract::geometry::MeshTexture::Ptr>> mesh_textures;
     if (mesh->textures)
     {
-        mesh_textures = std::make_shared<std::vector<tesseract::geometry::MeshTexture::Ptr>>(mesh->textures->size());
+        mesh_textures = std::make_shared<std::vector<tesseract::geometry::MeshTexture::Ptr>>();
+        mesh_textures->reserve(mesh->textures->size());
         boost::range::transform(*mesh->textures, std::back_inserter(*mesh_textures), MeshTextureFromRR);
     }
 
