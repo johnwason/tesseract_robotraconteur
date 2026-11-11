@@ -254,8 +254,9 @@ tesseract::geometry::PolygonMesh::Ptr MeshFromRR(const rr_shapes::MeshPtr& mesh)
     switch (mesh->mesh_type)
     {
     case rr_shapes::MeshType::mesh:
-        ret = std::make_shared<tesseract::geometry::PolygonMesh>(vertices, faces, face_count, nullptr, scale, normals,
-                                                                 vertex_colors, nullptr, mesh_textures);
+        // Robot Raconteur meshes are always triangle meshes. Collision checkers do not support PolygonMesh.
+        ret = std::make_shared<tesseract::geometry::Mesh>(vertices, faces, face_count, nullptr, scale, normals,
+                                                          vertex_colors, nullptr, mesh_textures);
         break;
     case rr_shapes::MeshType::sdf_mesh:
         ret = std::make_shared<tesseract::geometry::SDFMesh>(vertices, faces, face_count, nullptr, scale, normals,

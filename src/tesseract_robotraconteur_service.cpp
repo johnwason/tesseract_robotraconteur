@@ -50,7 +50,8 @@ int main(int argc, char** argv)
             "task-plugin-config-file", po::value(&task_plugin_config_file), "Task composer plugin configuration file");
 
         po::variables_map vm;
-        po::store(po::command_line_parser(argc, argv).options(generic_).run(), vm);
+        // --robotraconteur-* options are passed through to RobotRaconteurNodeSetup
+        po::store(po::command_line_parser(argc, argv).options(generic_).allow_unregistered().run(), vm);
         po::notify(vm);
 
         auto resource_locator = std::make_shared<tesseract::common::GeneralResourceLocator>();

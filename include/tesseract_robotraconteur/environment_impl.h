@@ -35,7 +35,7 @@ namespace tesseract_robotraconteur
 {
 class TesseractRoboticsImpl;
 class EnvironmentImpl : public virtual rr_env::Environment_default_impl,
-                        public std::enable_shared_from_this<EnvironmentImpl>
+                        public RR_ENABLE_SHARED_FROM_THIS<EnvironmentImpl>
 {
   public:
     EnvironmentImpl(tesseract::environment::Environment::Ptr env, RR_SHARED_PTR<TesseractRoboticsImpl> parent);

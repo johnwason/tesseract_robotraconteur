@@ -98,6 +98,7 @@ std::string TesseractRoboticsImpl::load_environment(const std::string& environme
     tesseract::environment::Environment::Ptr new_env = default_env->clone();
     new_env->setName(new_environment_name);
     auto rr_env = RR_MAKE_SHARED<EnvironmentImpl>(new_env, shared_from_this());
+    rr_env->Init();
     environments.insert(std::make_pair(new_environment_name, rr_env));
     return new_environment_name;
 }
@@ -114,6 +115,7 @@ std::string TesseractRoboticsImpl::clone_environment(const std::string& environm
     tesseract::environment::Environment::Ptr new_env = env->second->Environment()->clone();
     new_env->setName(new_environment_name);
     auto rr_env = RR_MAKE_SHARED<EnvironmentImpl>(new_env, shared_from_this());
+    rr_env->Init();
     environments.insert(std::make_pair(new_environment_name, rr_env));
     return new_environment_name;
 }

@@ -19,6 +19,7 @@ rrvar
 ruckig
 SRCS
 srdf
+STARTUPINFOA
 swri
 tesseract
 traj

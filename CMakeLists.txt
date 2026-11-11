@@ -10,6 +10,7 @@ find_package(RobotRaconteurCompanion REQUIRED)
 find_package(tesseract REQUIRED)
 find_package(tesseract_planning REQUIRED)
 find_package(drekar-launch-process-cpp REQUIRED)
+find_package(Eigen3 REQUIRED)
 
 robotraconteur_generate_thunk(
     RR_THUNK_SRCS
@@ -27,6 +28,11 @@ robotraconteur_generate_thunk(
     ${RobotRaconteur_STANDARD_ROBDEF_DIRS}
     AUTO_IMPORT)
 
+# Generated Robot Raconteur thunk code, shared by the service and the tests
+add_library(${PROJECT_NAME}_thunk STATIC ${RR_THUNK_HDRS} ${RR_THUNK_SRCS})
+target_link_libraries(${PROJECT_NAME}_thunk PUBLIC RobotRaconteurCore RobotRaconteurCompanion)
+target_include_directories(${PROJECT_NAME}_thunk PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>")
+
 add_executable(
     ${PROJECT_NAME}_service
     src/tesseract_robotraconteur_service.cpp
@@ -39,14 +45,11 @@ add_executable(
     src/tasks_impl.cpp
     src/tasks_conv.cpp
     src/task_exec_gen_impl.cpp
-    src/tesseract_robotics_impl.cpp
-    ${RR_THUNK_HDRS}
-    ${RR_THUNK_SRCS})
+    src/tesseract_robotics_impl.cpp)
 
 target_link_libraries(
     ${PROJECT_NAME}_service
-    PRIVATE RobotRaconteurCore
-            RobotRaconteurCompanion
+    PRIVATE ${PROJECT_NAME}_thunk
             tesseract::task_composer
             tesseract::motion_planners
             tesseract::common
@@ -76,4 +79,10 @@ install(TARGETS tesseract_robotraconteur_service RUNTIME DESTINATION ${CMAKE_INS
 
 if(TESSERACT_ROBOTRACONTEUR_BUILD_EXAMPLES)
     add_subdirectory(examples/cpp)
+endif()
+
+option(TESSERACT_ENABLE_TESTING "Build the tesseract_robotraconteur tests" OFF)
+if(TESSERACT_ENABLE_TESTING)
+    enable_testing()
+    add_subdirectory(test)
 endif()
