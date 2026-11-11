@@ -103,11 +103,13 @@ def main():
     instr2 = build_move_instr([0.8, 0.3, 1.455], np.deg2rad([0, 90, 0]))
     instr3 = build_move_instr([0.8, 0.5, 1.455], np.deg2rad([0, 90, 0]))
 
-    # Create and configure the manipulator info structure
+    # Create and configure the manipulator info structure. The default tcp_offset is all zeros, which
+    # is not a valid rotation, so set it to the identity.
     manip_info = manip_info_type()
     manip_info.tcp_frame = "tool0"
     manip_info.working_frame = "base_link"
     manip_info.manipulator = "manipulator"
+    manip_info.tcp_offset = geom.xyz_rpy_to_transform([0, 0, 0], [0, 0, 0])
 
     # Create and configure the composite instruction
     composite = composite_instr_type()

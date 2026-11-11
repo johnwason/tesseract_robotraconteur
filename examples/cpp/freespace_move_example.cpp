@@ -105,11 +105,13 @@ int main(int argc, char** argv)
     auto instr2 = build_move_instr(Eigen::Isometry3d::Identity() * Eigen::Translation3d(0.9, 0.3, 1.455) *
                                    Eigen::Quaterniond(0.70710678, 0, 0.70710678, 0));
 
-    // Create and configure the manipulator info structure
+    // Create and configure the manipulator info structure. The default tcp_offset is all zeros, which
+    // is not a valid rotation, so set it to the identity.
     rr_common::ManipulatorInfoPtr manip_info(new rr_common::ManipulatorInfo());
     manip_info->manipulator = "manipulator";
     manip_info->tcp_frame = "tool0";
     manip_info->working_frame = "base_link";
+    manip_info->tcp_offset = RRC_Eigen::ToTransform(Eigen::Isometry3d::Identity());
 
     // Create and configure the composite instruction
     rr_command::CompositeInstructionPtr composite(new rr_command::CompositeInstruction());
