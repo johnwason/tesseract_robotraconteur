@@ -80,8 +80,12 @@ void EnvironmentImpl::Init()
             return;
         }
 
-        // TODO: potential thread corruption here
-        auto applied_broadcaster = shared_this->rrvar_applied_commands;
+        // rrvar_applied_commands is assigned under this_lock by the generated set_applied_commands()
+        RR::PipeBroadcasterPtr<rr_env_cmds::CommandsPtr> applied_broadcaster;
+        {
+            boost::mutex::scoped_lock lock(shared_this->this_lock);
+            applied_broadcaster = shared_this->rrvar_applied_commands;
+        }
         EnvironmentImpl_send_applied_commands(applied_broadcaster, event);
     });
 }

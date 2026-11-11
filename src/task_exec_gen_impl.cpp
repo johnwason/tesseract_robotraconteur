@@ -79,28 +79,21 @@ void TaskExecGenImpl::StartTask()
     });
 }
 
-void TaskExecGenImpl::CloseRequested()
+void TaskExecGenImpl::AbortTask()
 {
     tesseract::task_composer::TaskComposerFuture::Ptr fut = weak_fut.lock();
-    if (!fut)
+    if (!fut || !fut->valid() || fut->ready())
     {
+        // Not started or already finished
         return;
     }
 
-    // TODO: check if task is running
     fut->context->abort();
 }
 
-void TaskExecGenImpl::AbortRequested()
-{
-    tesseract::task_composer::TaskComposerFuture::Ptr fut = weak_fut.lock();
-    if (!fut)
-    {
-        return;
-    }
+// Task composer tasks cannot be stopped gracefully, so close and abort both abort the task
+void TaskExecGenImpl::CloseRequested() { AbortTask(); }
 
-    // TODO: check if task is running
-    fut->context->abort();
-}
+void TaskExecGenImpl::AbortRequested() { AbortTask(); }
 
 } // namespace tesseract_robotraconteur
