@@ -7,9 +7,9 @@
 // The service should be started prior to running this program. See the readme for instructions on
 // how to start the service.
 //
-// The client requires Node.js 22.18 or newer, which runs .ts files directly. The robotraconteur
-// (node-split branch) and robotraconteur-node packages are not on npm yet. Check them out next to
-// each other and build them as described in the robotraconteur-node readme:
+// The client requires Node.js 22.18 or newer, which runs .ts files directly. The robotraconteur and
+// robotraconteur-node packages are not on npm yet. Clone and build them next to each other as
+// described in the robotraconteur-node readme:
 //
 //    https://github.com/johnwason/robotraconteur_typescript_node#installing
 //
@@ -22,16 +22,10 @@
 // JavaScript objects do not carry their Robot Raconteur type.
 
 import { randomUUID } from "node:crypto";
-import { GeneratorHandle, RobotRaconteurError, RobotRaconteurNode, VarValue } from "robotraconteur";
+import { getConstants, newStructure, RobotRaconteurNode, VarValue } from "robotraconteur";
 import { TcpTransport } from "robotraconteur-node";
 
 const COMMAND_LANGUAGE = "experimental.tesseract_robotics.command_language";
-
-// Enum values from the service definitions. The structures below are plain objects, and the service
-// definitions are pulled from the service automatically when connecting.
-const MOVE_INSTRUCTION_TYPE_FREESPACE = 1;
-const COMPOSITE_INSTRUCTION_ORDER_ORDERED = 0;
-const ACTION_STATUS_CODE_COMPLETE = 3;
 
 interface TaskComposerKey {
     keys: VarValue;
@@ -76,28 +70,6 @@ function xyzRpyToTransform([x, y, z]: number[], [roll, pitch, yaw]: number[]) {
 
 const deg2rad = (degrees: number) => (degrees * Math.PI) / 180;
 
-// Named array, numeric array, and string fields cannot be left unset. Other fields default to null.
-const NIL_UUID = { uuid_bytes: new Uint8Array(16) };
-const IDENTITY_TRANSFORM = xyzRpyToTransform([0, 0, 0], [0, 0, 0]);
-
-// Helper function to make a Move instruction
-function buildMoveInstr(xyz: number[], rpy: number[]): VarValue {
-    // Create a cartesian waypoint. Joint waypoints are also available.
-    const wp = { transform: xyzRpyToTransform(xyz, rpy), upper_tolerance: [], lower_tolerance: [], name: "" };
-
-    // Create a move instruction and set the waypoint
-    const instr = {
-        uuid: newRandomUuid(),
-        parent_uuid: NIL_UUID,
-        waypoint: new VarValue(wp, `${COMMAND_LANGUAGE}.CartesianWaypoint`),
-        profile: "DEFAULT",
-        path_profile: "",
-        move_type: MOVE_INSTRUCTION_TYPE_FREESPACE,
-        description: ""
-    };
-    return new VarValue(instr, `${COMMAND_LANGUAGE}.MoveInstruction`);
-}
-
 // Connect to the service. In this case, a localhost url is used. If the service were running on a
 // remote node, the URL would be "rr+tcp://hostname.example.com:port?service=tesseract".
 //
@@ -109,6 +81,27 @@ node.registerTransport(new TcpTransport(node));
 
 try {
     const c = await node.connectService(url);
+
+    // Get the enums from the service definitions. The definitions are pulled from the service when
+    // connecting.
+    const commandLanguageConst = getConstants(c, COMMAND_LANGUAGE);
+    const actionConst = getConstants(c, "com.robotraconteur.action");
+
+    // Helper function to make a Move instruction. newStructure creates a structure with every field
+    // set to its default, so only the fields that matter need to be set.
+    const buildMoveInstr = (xyz: number[], rpy: number[]): VarValue => {
+        // Create a cartesian waypoint. Joint waypoints are also available.
+        const wp = newStructure(c, `${COMMAND_LANGUAGE}.CartesianWaypoint`);
+        wp.transform = xyzRpyToTransform(xyz, rpy);
+
+        // Create a move instruction and set the waypoint
+        const instr = newStructure(c, `${COMMAND_LANGUAGE}.MoveInstruction`);
+        instr.uuid = newRandomUuid();
+        instr.waypoint = new VarValue(wp, `${COMMAND_LANGUAGE}.CartesianWaypoint`);
+        instr.profile = "DEFAULT";
+        instr.move_type = commandLanguageConst.MoveInstructionType.freespace;
+        return new VarValue(instr, `${COMMAND_LANGUAGE}.MoveInstruction`);
+    };
 
     // Get the available task pipeline information from the service. Tesseract task pipelines
     // execute planning and other operations
@@ -123,65 +116,56 @@ try {
     await c.callFunction("load_environment", ["default", "env"]);
 
     // Create the EnvironmentHandle to pass to the planner
-    const envHandleInput = new VarValue({ name: "env" }, "experimental.tesseract_robotics.environment.EnvironmentHandle");
+    const envHandle = newStructure(c, "experimental.tesseract_robotics.environment.EnvironmentHandle");
+    envHandle.name = "env";
+    const envHandleInput = new VarValue(envHandle, "experimental.tesseract_robotics.environment.EnvironmentHandle");
 
     // Create the instructions
     const rpy = [0, deg2rad(90), 0];
     const instr1 = buildMoveInstr([0.8, -0.3, 1.455], rpy);
     const instr2 = buildMoveInstr([0.8, 0.3, 1.455], rpy);
 
-    // Create and configure the manipulator info structure
-    const manipInfo = {
-        tcp_frame: "tool0",
-        working_frame: "base_link",
-        manipulator: "manipulator",
-        tcp_offset: IDENTITY_TRANSFORM,
-        manipulator_ik_solver: ""
-    };
+    // Create and configure the manipulator info structure. The default tcp_offset is all zeros, which
+    // is not a valid rotation, so set it to the identity.
+    const manipInfo = newStructure(c, "experimental.tesseract_robotics.common.ManipulatorInfo");
+    manipInfo.tcp_frame = "tool0";
+    manipInfo.working_frame = "base_link";
+    manipInfo.manipulator = "manipulator";
+    manipInfo.tcp_offset = xyzRpyToTransform([0, 0, 0], [0, 0, 0]);
 
     // Create and configure the composite instruction
-    const composite = {
-        order: COMPOSITE_INSTRUCTION_ORDER_ORDERED,
-        instructions: [instr1, instr2],
-        manipulator_info: manipInfo,
-        uuid: newRandomUuid(),
-        parent_uuid: NIL_UUID,
-        description: "",
-        profile: ""
-    };
+    const composite = newStructure(c, `${COMMAND_LANGUAGE}.CompositeInstruction`);
+    composite.order = commandLanguageConst.CompositeInstructionOrder.ordered;
+    composite.instructions = [instr1, instr2];
+    composite.manipulator_info = manipInfo;
+    composite.uuid = newRandomUuid();
     const compositeInput = new VarValue(composite, `${COMMAND_LANGUAGE}.CompositeInstruction`);
 
     // Find the first executor and get the task executor object
     const executorsInfo = (await c.getProperty("task_executors_info")) as Map<string, TaskExecutorInfo>;
     const [defaultExecutor] = executorsInfo.values();
-    const executor = await c.getObjRef("task_executors", defaultExecutor.name);
+    const executor = await c.getObjRef("task_executors", defaultExecutor!.name);
 
     // Create the task executor input and set the pipeline name. In this case, we are using the
     // FreespacePipeline. Other pipelines are available. These pipelines are configured when the
     // service is started.
-    const execInput = {
-        task_name: "FreespacePipeline",
-        data_storage: new Map<string, VarValue>([
-            ["environment", envHandleInput],
-            [inputKey, compositeInput]
-        ])
-    };
+    const execInput = newStructure(c, "experimental.tesseract_robotics.tasks.TaskExecutorInput");
+    execInput.task_name = "FreespacePipeline";
+    execInput.data_storage = new Map<string, VarValue>([
+        ["environment", envHandleInput],
+        [inputKey, compositeInput]
+    ]);
 
     // Run the pipeline. It returns a Robot Raconteur "Generator", which is used for long running
-    // operations. Call callFunctionGenNext until the generator signals that it is complete.
-    const execGen = (await executor.callFunction("run", [execInput])) as GeneratorHandle;
+    // operations. Read status updates from it until it is complete.
+    const execGen = await executor.callGenerator<TaskExecutorStatus>("run", [execInput]);
     let status: TaskExecutorStatus | undefined;
-    while (true) {
-        try {
-            status = (await executor.callFunctionGenNext(execGen)) as TaskExecutorStatus;
-        } catch (e) {
-            if (e instanceof RobotRaconteurError && e.isStopIteration) break;
-            throw e;
-        }
+    for await (const s of execGen) {
+        status = s;
     }
 
     // Check the status of the pipeline to make sure it completed successfully
-    if (status?.action_status !== ACTION_STATUS_CODE_COMPLETE) {
+    if (!status || status.action_status !== actionConst.ActionStatusCode.complete) {
         throw new Error(`Planning failed with action status ${status?.action_status}`);
     }
 
