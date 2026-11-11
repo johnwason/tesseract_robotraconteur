@@ -72,7 +72,7 @@ EnvironmentImpl::EnvironmentImpl(tesseract::environment::Environment::Ptr env,
 
 void EnvironmentImpl::Init()
 {
-    std::weak_ptr<EnvironmentImpl> weak_this = shared_from_this();
+    RR_WEAK_PTR<EnvironmentImpl> weak_this = shared_from_this();
     env_->addEventCallback(123, [weak_this](const tesseract::environment::Event& event) {
         auto shared_this = weak_this.lock();
         if (!shared_this)
@@ -106,12 +106,22 @@ RobotRaconteur::RRListPtr<RobotRaconteur::RRArray<char>> EnvironmentImpl::get_li
 
 rr_sg::JointPtr EnvironmentImpl::getf_joint(const std::string& joint_name)
 {
-    return environment_conv::JointToRR(env_->getJoint(joint_name));
+    auto joint = env_->getJoint(joint_name);
+    if (!joint)
+    {
+        throw RR::InvalidArgumentException("Joint not found: " + joint_name);
+    }
+    return environment_conv::JointToRR(joint);
 }
 
 rr_sg::LinkPtr EnvironmentImpl::getf_link(const std::string& link_name)
 {
-    return environment_conv::LinkToRR(env_->getLink(link_name));
+    auto link = env_->getLink(link_name);
+    if (!link)
+    {
+        throw RR::InvalidArgumentException("Link not found: " + link_name);
+    }
+    return environment_conv::LinkToRR(link);
 }
 
 int32_t EnvironmentImpl::apply_command(const RobotRaconteur::RRValuePtr& command)

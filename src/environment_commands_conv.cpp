@@ -115,7 +115,7 @@ rr_env_cmd::AddSceneGraphCommandPtr AddSceneGraphCommandToRR(
 {
     rr_env_cmd::AddSceneGraphCommandPtr rr_cmd(new rr_env_cmd::AddSceneGraphCommand());
     rr_cmd->scene_graph = SceneGraphToRR(cmd->getSceneGraph());
-    if (rr_cmd->joint)
+    if (cmd->getJoint())
     {
         rr_cmd->joint = JointToRR(cmd->getJoint());
     }
@@ -131,13 +131,12 @@ tesseract::environment::AddSceneGraphCommand::Ptr AddSceneGraphCommandFromRR(
     RR_NULL_CHECK(cmd->scene_graph);
     tesseract::scene_graph::SceneGraph::Ptr graph = SceneGraphFromRR(cmd->scene_graph);
 
-    tesseract::scene_graph::Joint::Ptr joint;
     if (cmd->joint)
     {
-        joint = JointFromRR(cmd->joint);
+        auto joint = JointFromRR(cmd->joint);
+        return std::make_shared<tesseract::environment::AddSceneGraphCommand>(*graph, *joint, cmd->prefix);
     }
-    auto ret = std::make_shared<tesseract::environment::AddSceneGraphCommand>(*graph, *joint, cmd->prefix);
-    return ret;
+    return std::make_shared<tesseract::environment::AddSceneGraphCommand>(*graph, cmd->prefix);
 }
 
 // struct AddTrajectoryLinkCommand

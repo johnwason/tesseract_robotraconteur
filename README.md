@@ -102,6 +102,18 @@ The standard Robot Raconteur options are also available. See
 [Robot Raconteur Node Command Line Options](https://github.com/robotraconteur/robotraconteur/wiki/Command-Line-Options)
 for more information.
 
+### Running the tests
+
+The tests start the `tesseract_robotraconteur_service` executable as a separate process, using the ABB IRB2400
+from the Tesseract support package, and connect to it as a Robot Raconteur client over the local transport.
+Configure with `-DTESSERACT_ENABLE_TESTING=ON` to build them:
+
+```bash
+colcon build --packages-select tesseract_robotraconteur --cmake-args -DTESSERACT_ENABLE_TESTING=ON
+colcon test --packages-select tesseract_robotraconteur
+colcon test-result --verbose
+```
+
 ## Using the Service
 
 The service is a wrapper around the Tesseract motion planning library. The following example

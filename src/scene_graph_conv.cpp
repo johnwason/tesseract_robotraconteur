@@ -403,7 +403,7 @@ rr_sg::LinkPtr LinkToRR(const tesseract::scene_graph::Link& link)
                     }
                     auto rr_m = std::get<0>(MeshToRR(*m));
                     rr_sg::VisualPtr visual_ptr1(new rr_sg::Visual());
-                    visual_ptr1->name = visual->name + "_submesh" + boost::lexical_cast<std::string>(submesh_count);
+                    visual_ptr1->name = visual->name + "_submesh" + boost::lexical_cast<std::string>(submesh_count++);
                     visual_ptr1->origin = RRC_Eigen::ToPose(visual->origin);
                     visual_ptr1->geometry = rr_m;
                     visual_ptr1->material = LinkMaterialToRR(visual->material, m);
