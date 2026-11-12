@@ -7,15 +7,11 @@
 // The service should be started prior to running this program. See the readme for instructions on
 // how to start the service.
 //
-// The client requires Node.js 22.18 or newer, which runs .ts files directly. The robotraconteur and
-// robotraconteur-node packages are not on npm yet. Clone and build them next to each other as
-// described in the robotraconteur-node readme:
+// The client requires Node.js 22.18 or newer, which runs .ts files directly, and the robotraconteur
+// and robotraconteur-node packages from npm. Tesseract is not needed on the client side. Install
+// the packages in this folder and run the client:
 //
-//    https://github.com/johnwason/robotraconteur_typescript_node#installing
-//
-// Then install them in this folder and run the client:
-//
-//    npm install --no-save /path/to/robotraconteur_typescript /path/to/robotraconteur_typescript_node
+//    npm install
 //    node freespace_move_example.ts [connection URL]
 //
 // Note the use of VarValue throughout the example. It specifies the type of varvalue data, since
@@ -125,8 +121,9 @@ try {
     const instr1 = buildMoveInstr([0.8, -0.3, 1.455], rpy);
     const instr2 = buildMoveInstr([0.8, 0.3, 1.455], rpy);
 
-    // Create and configure the manipulator info structure. The default tcp_offset is all zeros, which
-    // is not a valid rotation, so set it to the identity.
+    // Create and configure the manipulator info structure. tcp_offset is set to the identity
+    // explicitly: service images up to 0.4.0 use a robotraconteur_companion version that turns an
+    // all-zero rotation into an uninitialized one, which can make the plan abort.
     const manipInfo = newStructure(c, "experimental.tesseract_robotics.common.ManipulatorInfo");
     manipInfo.tcp_frame = "tool0";
     manipInfo.working_frame = "base_link";
